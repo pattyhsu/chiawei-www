@@ -190,6 +190,8 @@
   var kids = [];      // [{id, name, student_no}]
   var current = null; // active student id
 
+  var DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
   function $(id) { return document.getElementById(id); }
   function show(id) {
     ["st-loading", "st-notopen", "st-error", "st-bind", "st-report"].forEach(function (s) {
@@ -410,11 +412,27 @@
 
   // ── boot ──────────────────────────────────────────────────────────────────
   async function boot() {
-    if (!LIFF_ID) { show("st-notopen"); return; }
-    try {
-      await liff.init({ liffId: LIFF_ID });
-    } catch (e) { oops("LINE 登入初始化失敗。"); return; }
-    if (!(await ensureSession())) return;
+    if (DEV) {
+      // localhost preview: no LIFF. A one-time link carries #th=<token_hash>
+      // (minted server-side for a seeded TEST parent — the same magiclink
+      // mechanism the LINE flow uses); redeeming it persists a session, so
+      // later visits need no link. No credentials exist on this page.
+      var m = location.hash.match(/th=([A-Za-z0-9_-]+)/);
+      if (m) {
+        history.replaceState(null, "", location.pathname);
+        var dv = await sb.auth.verifyOtp({ token_hash: m[1], type: "magiclink" });
+        if (dv.error) { oops("測試連結無效或已過期，請重新產生一條。"); return; }
+      } else {
+        var s = await sb.auth.getSession();
+        if (!s.data.session) { oops("測試模式：請由帶 token 的測試連結進入。"); return; }
+      }
+    } else {
+      if (!LIFF_ID) { show("st-notopen"); return; }
+      try {
+        await liff.init({ liffId: LIFF_ID });
+      } catch (e) { oops("LINE 登入初始化失敗。"); return; }
+      if (!(await ensureSession())) return;
+    }
     $("who").innerHTML = '<a href="#" id="signout">登出</a>';
     $("signout").onclick = function (ev) {
       ev.preventDefault();
