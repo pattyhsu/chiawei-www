@@ -215,8 +215,10 @@
   .enstep .free{display:inline-block;margin-top:8px;font-size:.74rem;font-weight:800;color:#1E7A44;background:#F0F7F2;border:1px solid #CFE6D6;border-radius:999px;padding:2px 10px}
 
   /* ===== FAQ ===== */
-  .faq{max-width:760px}
-  .faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:10px}
+  /* two-column on desktop: 一欄的話右半邊整片留白 */
+  .faq{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;align-items:start}
+  @media(max-width:760px){.faq{grid-template-columns:1fr}}
+  .faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
   .faq summary{font-weight:800;cursor:pointer;font-size:.98rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
   .faq summary::after{content:"+";color:var(--blue);font-weight:900;font-size:1.2rem}
   .faq details[open] summary::after{content:"−"}
@@ -394,7 +396,7 @@
   <div class="wrap">
     <div class="sec-head"><div class="eyebrow">常見問題</div><h2>高中生（和家長）最常問</h2></div>
     <div class="faq">
-      <details><summary>高一就需要補嗎？</summary><p>高一上學期就是斷層期：跟得上就不用；覺得「上課聽得懂、考試寫不出」就是訊號。不確定的話，先來做份免費觀念檢測最快。</p></details><details><summary>只補數學可以嗎？</summary><p>可以，單科為主是常態。</p></details><details><summary>學測班什麼時候開始？</summary><p>高三暑假開跑（示意）；高二下可先卡位詢問。</p></details>
+      <details><summary>高一就需要補嗎？</summary><p>高一上學期就是斷層期：跟得上就不用；覺得「上課聽得懂、考試寫不出」就是訊號。不確定的話，先來做份免費觀念檢測最快。</p></details><details><summary>只補數學可以嗎？</summary><p>可以，單科為主是常態。</p></details><details><summary>學測班什麼時候開始？</summary><p>高三暑假開跑（示意）；高二下可先卡位詢問。</p></details><details><summary>檢測要收費嗎？做完一定要報名嗎？</summary><p>檢測與試聽都免費，也不綁報名——診斷報告直接帶走。先看清楚自己卡在哪，再決定要不要來上課。</p></details>
     </div>
   </div>
 </section>
