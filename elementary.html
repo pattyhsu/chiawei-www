@@ -235,6 +235,35 @@
   .contact{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:24px;font-size:.95rem;color:#C6D2FF}
   .contact b{color:#fff;flex:none;white-space:nowrap}
   .contact div{display:flex;gap:10px;margin-bottom:8px}
+  /* ===== 預約表單 (lead-form.js) ===== */
+  .leadform{background:var(--card);border-radius:16px;padding:clamp(20px,3vw,28px);color:var(--ink);box-shadow:0 30px 60px -38px rgba(0,0,0,.5)}
+  .leadform .lf-t{font-size:1.05rem;font-weight:900;margin-bottom:4px}
+  .leadform .lf-s{font-size:.88rem;color:var(--slate);margin-bottom:16px}
+  .lf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.lf-grid{grid-template-columns:1fr}}
+  .lf-f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;font-weight:700}
+  .lf-f>span{color:#33384c}
+  .lf-f i{color:var(--orange);font-style:normal}
+  .lf-f input,.lf-f select,.lf-f textarea{font:inherit;font-size:.95rem;font-weight:500;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff;color:var(--ink);width:100%}
+  .lf-f input:focus,.lf-f select:focus,.lf-f textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-tint)}
+  .lf-f textarea{resize:vertical}
+  .lf-subj{border:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+  .lf-subj legend{font-size:.85rem;font-weight:700;color:#33384c;padding:0;margin-bottom:8px}
+  .lf-chip{position:relative}
+  .lf-chip input{position:absolute;opacity:0;width:0;height:0}
+  .lf-chip span{display:inline-block;border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .12s ease}
+  .lf-chip input:checked+span{background:var(--blue-tint);border-color:var(--blue);color:var(--blue)}
+  .lf-chip input:focus-visible+span{box-shadow:0 0 0 3px var(--blue-tint)}
+  .lf-f:has(textarea){margin-top:14px}
+  .lf-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
+  .lf-actions button{border:none;cursor:pointer;font-family:inherit}
+  .lf-privacy{flex:1;min-width:220px;font-size:.76rem;color:var(--slate);line-height:1.6}
+  .lf-privacy a{color:var(--blue);text-decoration:underline}
+  .lf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .lf-msg{margin-top:10px;font-size:.88rem;color:var(--slate);min-height:1.2em}
+  .lf-msg.err{color:var(--orange-deep);font-weight:700}
+  .lf-done b{display:block;font-size:1.1rem;color:var(--blue);margin-bottom:6px}
+  .lf-done p{font-size:.92rem;color:#33384c}
   footer{padding:30px 0 40px;color:var(--slate);font-size:.86rem}
   .foot-in{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:baseline}
   .foot-in .couplet{font-weight:800;color:var(--ink)}
@@ -377,7 +406,7 @@
     <div>
       <h2>讓孩子<span class="g">贏在地基</span>，不是贏在焦慮</h2>
       <p>免費體驗一堂課；小五、小六可加做「國中銜接檢測」——看看孩子適不適合，再決定。</p>
-      <div class="hero-ctas"><a class="btn btn-cta" href="#">預約體驗＋檢測</a><a class="btn btn-ghost" href="tel:037682000">電話預約</a></div>
+      <div class="leadform" style="margin-top:22px"><div class="lf-t">國小部｜免費觀念檢測・小五小六加做國中銜接檢測</div><div class="lf-s">留下聯絡方式，我們會在一個工作天內回電安排時間。</div><div data-lead-form data-page="elementary" data-stages="國小"></div></div>
     </div>
     <div class="contact">
       <div><b>頭份班</b><span>苗栗縣頭份市建國路 52 號｜(037) 682-000</span></div><div><b>竹南班</b><span>苗栗縣竹南鎮中正路 287 號｜(037) 465-222</span></div><div><b>LINE</b><span>@chiawei｜櫃檯 週一至週六 14:00–22:00</span></div>
@@ -396,5 +425,6 @@
   <a class="sb-line" href="#cta">預約免費檢測</a>
   <a class="sb-tel" href="tel:037682000">打電話</a>
 </div>
+<script src="lead-form.js" defer></script>
 </body>
 </html>
