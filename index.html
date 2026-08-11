@@ -196,6 +196,19 @@
   .leapchip .d{margin-left:auto;font-weight:800;color:var(--gold)}
   .band .demo-badge{background:rgba(248,196,20,.14);color:#FFD95C;border-color:#B98F00}
   .band .note{margin-top:16px;font-size:.85rem;color:#8FA0D8}
+  /* 數字帶 + 可放長名單的榜單牆 */
+  .statrow{display:flex;gap:clamp(18px,4vw,54px);align-items:center;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,28px);
+    padding-bottom:clamp(18px,2.5vw,24px);border-bottom:1px solid rgba(255,255,255,.14)}
+  .statrow .stat{display:flex;align-items:baseline;gap:8px}
+  .statrow .stat>b{font-size:clamp(2rem,4.4vw,2.9rem);font-weight:900;color:var(--gold);line-height:1}
+  .statrow .stat>span{font-size:.95rem;color:#C6D2FF}
+  .statrow .stat>span b{color:#fff;font-weight:800}
+  .roll-wide{margin-bottom:18px}
+  /* .roll ul sets flex-column, so this needs the same specificity to win */
+  .roll ul.rollgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
+  @media(max-width:760px){.roll ul.rollgrid{grid-template-columns:1fr}}
+  .leaps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:760px){.leaps-row{grid-template-columns:1fr}}
 
   /* ===== method (tight) + progress ===== */
   .steps3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
@@ -393,24 +406,36 @@
   <div class="wrap">
     <div class="sec-head">
       <div class="eyebrow">升學成果 · Results</div>
-      <h2>先看證據：三十年，成果會說話</h2>
-      <p class="sub">頭份・竹南・新竹四校區、兩代家庭的信任——而且我們說得出每一分成果是怎麼來的。</p>
+      <h2>歷年進入第一、第二志願的孩子</h2>
+      <p class="sub">名單比形容詞有用。這裡放的是真的考上的孩子——而且每一個名字，我們都說得出他是怎麼考上的。</p>
     </div>
-    <div class="results">
-      <div class="roll">
-        <div class="rt"><span>榜單牆 · Roll of honor</span><span class="demo-badge">示意資料</span></div>
-        <ul>
-          <li>王○宇　新竹高中 <b>5A++</b></li>
-          <li>李○蓁　新竹女中 <b>5A+</b></li>
-          <li>張○睿　實驗中學 <b>5A</b></li>
-          <li>陳○安　竹科實中 <b>5A</b></li>
-        </ul>
-      </div>
-      <div class="leaps">
-        <div class="leapchip"><span class="w">國三 · 陳同學</span><span class="f num">58</span><span class="a">→</span><span class="t num">86</span><span class="d num">+28</span></div>
-        <div class="leapchip"><span class="w">國三 · 林同學</span><span class="f num">71</span><span class="a">→</span><span class="t num">94</span><span class="d num">+23</span></div>
-        <div class="leapchip"><span class="w">國二 · 張同學</span><span class="f num">49</span><span class="a">→</span><span class="t num">78</span><span class="d num">+29</span></div>
-      </div>
+
+    <!-- 數字帶：填真實數字後拿掉 demo-badge -->
+    <div class="statrow">
+      <div class="stat"><b class="num">00</b><span>位　進入<b>第一志願</b></span></div>
+      <div class="stat"><b class="num">00</b><span>位　進入<b>第二志願</b></span></div>
+      <div class="stat"><b class="num">00</b><span>年　累積榜單</span></div>
+      <span class="demo-badge">數字示意，待填</span>
+    </div>
+
+    <div class="roll roll-wide">
+      <div class="rt"><span>榜單牆 · Roll of honor</span><span class="demo-badge">示意資料</span></div>
+      <ul class="rollgrid">
+        <li>王○宇　新竹高中 <b>5A++</b></li>
+        <li>李○蓁　新竹女中 <b>5A+</b></li>
+        <li>張○睿　實驗中學 <b>5A</b></li>
+        <li>陳○安　竹科實中 <b>5A</b></li>
+        <li>林○妤　苗栗高中 <b>5A</b></li>
+        <li>黃○翔　竹南高中 <b>4A1B</b></li>
+        <li>吳○庭　苗栗高中 <b>4A1B</b></li>
+        <li>劉○宏　竹南高中 <b>4A1B</b></li>
+      </ul>
+    </div>
+
+    <div class="leaps leaps-row">
+      <div class="leapchip"><span class="w">國三 · 陳同學</span><span class="f num">58</span><span class="a">→</span><span class="t num">86</span><span class="d num">+28</span></div>
+      <div class="leapchip"><span class="w">國三 · 林同學</span><span class="f num">71</span><span class="a">→</span><span class="t num">94</span><span class="d num">+23</span></div>
+      <div class="leapchip"><span class="w">國二 · 張同學</span><span class="f num">49</span><span class="a">→</span><span class="t num">78</span><span class="d num">+29</span></div>
     </div>
     <p class="note">中段的躍升與頂標同樣是成果。所有公開榜單皆經家長書面同意；上線前以真實資料替換示意內容。</p>
   </div>
