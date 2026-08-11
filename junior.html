@@ -50,6 +50,18 @@
   .logo-slot .en{font-size:.66rem;letter-spacing:.32em;color:var(--slate);font-weight:600;display:block;margin-top:1px}
   .nav-links{margin-left:auto;display:flex;gap:20px;font-size:.94rem;font-weight:600;color:#33384c}
   .nav-links a:hover{color:var(--blue)}
+  /* 班別課程 dropdown */
+  .navdrop{position:relative}
+  .navdrop>a{display:inline-flex;align-items:center;gap:5px}
+  .navdrop>a::after{content:"▾";font-size:.8em;color:var(--slate);transition:transform .12s ease}
+  .navdrop:hover>a::after,.navdrop:focus-within>a::after{transform:rotate(180deg);color:var(--blue)}
+  .navdrop-menu{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 44px -22px rgba(15,28,77,.45);padding:8px;min-width:196px;display:none;flex-direction:column}
+  .navdrop-menu::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+  .navdrop:hover .navdrop-menu,.navdrop:focus-within .navdrop-menu{display:flex}
+  .navdrop-menu a{padding:9px 12px;border-radius:8px;font-weight:700;white-space:nowrap;line-height:1.4}
+  .navdrop-menu a:hover{background:var(--blue-tint)}
+  .navdrop-menu a[aria-current]{background:var(--blue-tint);color:var(--blue)}
+  .navdrop-menu small{display:block;font-size:.74rem;color:var(--slate);font-weight:600}
   .btn{display:inline-block;border-radius:10px;font-weight:800;letter-spacing:.04em;text-align:center;transition:transform .12s ease, background .12s ease}
   .btn:active{transform:scale(.98)}
   .btn-cta{background:var(--orange);color:#fff;font-size:1.19rem;padding:12px 26px}
@@ -245,15 +257,6 @@
   .photocard img{display:block;width:100%;height:clamp(230px,26vw,330px);object-fit:cover;filter:saturate(1.06) brightness(1.03)}
   .hero-visual .heroproof,.hero-visual .heroquote{margin:-46px 16px 0;position:relative;z-index:2}
   .hero-visual .heroquote{background:#fff;box-shadow:0 18px 40px -24px rgba(15,28,77,.35)}
-
-  .offlist{display:flex;flex-direction:column;gap:12px;max-width:820px}
-  .off-row{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:16px 20px}
-  .off-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .off-main b{font-size:1.05rem;font-weight:800}
-  .off-tag{font-size:.78rem;background:var(--blue-tint);color:var(--blue-deep);border-radius:999px;padding:2px 12px;font-weight:700}
-  .off-meta{margin-top:6px;font-size:.9rem;color:#33384c}
-  .off-note{margin-top:4px;font-size:.84rem;color:var(--slate)}
-  .off-empty{color:var(--slate);font-size:.95rem}
 </style>
 </head>
 <body>
@@ -264,7 +267,14 @@
       <span>家偉文理補習班<span class="en">CHIAWEI</span></span>
     </a>
     <div class="nav-links">
-      <a href="index.html#classes">全部班別</a>
+      <div class="navdrop">
+        <a href="index.html#classes">班別課程</a>
+        <div class="navdrop-menu">
+          <a href="elementary.html">國小部<small>三～六年級</small></a>
+          <a href="junior.html" aria-current="page">國中部<small>國一～國三</small></a>
+          <a href="senior.html">高中部<small>高一～高三</small></a>
+        </div>
+      </div>
       <a href="index.html#locations">校區資訊</a>
       <a href="index.html#results">升學成果</a>
       <a href="index.html#faq">常見問題</a>
@@ -281,7 +291,7 @@
       <h1><span class="hl">精熟每一類題型</span>，<br><span class="l2">會考自然高分。</span></h1>
       <p class="lede">三十年主力。每一題都標記到觀念，考完不是一個分數，而是<strong>哪個觀念懂了、哪個還沒懂</strong>——一類一類收服，會考不靠運氣。</p>
       <div class="hero-ctas">
-        <a class="btn btn-cta" href="#cta">加 LINE・預約免費觀念檢測</a>
+        <a class="btn btn-cta" href="#cta">預約免費觀念檢測</a>
         <a class="btn btn-ghost" href="tel:037682000">電話詢問</a>
       </div>
       <p class="ctanote">國一～國三、五科任選，約 30–40 分鐘——<b>當天帶走孩子的診斷報告</b>：會考前要補的洞，一張表看清楚。</p>
@@ -368,24 +378,12 @@
 </section>
 
 
-<!-- ===== 近期開課（live：admin 開課資訊台發布） ===== -->
-<section id="offerings" style="padding-top:0">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">最新開課 · New Classes</div>
-      <h2>國中部 近期開課資訊</h2>
-      <p class="sub">最新開班與插班訊息。沒看到適合的班？常年招生，加 LINE 直接詢問最快。</p>
-    </div>
-    <div class="offlist" data-offerings data-stage="國中"></div>
-  </div>
-</section>
-
 <section class="ctaband" id="cta">
   <div class="wrap cta-grid">
     <div>
       <h2>會考這一仗，<span class="g">用三十年的打法</span></h2>
       <p>免費五科觀念檢測＋試聽一堂——當天帶走診斷報告，看見會考前還要補哪些洞。</p>
-      <div class="hero-ctas"><a class="btn btn-cta" href="#">加 LINE・預約免費檢測</a><a class="btn btn-ghost" href="tel:037682000">電話預約</a></div>
+      <div class="hero-ctas"><a class="btn btn-cta" href="#">預約免費檢測</a><a class="btn btn-ghost" href="tel:037682000">電話預約</a></div>
     </div>
     <div class="contact">
       <div><b>頭份班</b><span>苗栗縣頭份市建國路 52 號｜(037) 682-000</span></div><div><b>竹南班</b><span>苗栗縣竹南鎮中正路 287 號｜(037) 465-222</span></div><div><b>新竹班</b><span>新竹市關新路 18 號｜(03) 666-2865</span></div><div><b>LINE</b><span>@chiawei｜櫃檯 週一至週六 14:00–22:00</span></div>
@@ -401,9 +399,8 @@
   </div>
 </footer>
 <div class="stickybar">
-  <a class="sb-line" href="#cta">LINE 預約免費檢測</a>
+  <a class="sb-line" href="#cta">預約免費檢測</a>
   <a class="sb-tel" href="tel:037682000">打電話</a>
 </div>
-<script src="offerings.js" defer></script>
 </body>
 </html>
