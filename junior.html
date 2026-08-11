@@ -264,7 +264,22 @@
   .lf-msg.err{color:var(--orange-deep);font-weight:700}
   .lf-done b{display:block;font-size:1.1rem;color:var(--blue);margin-bottom:6px}
   .lf-done p{font-size:.92rem;color:#33384c}
-  footer{padding:30px 0 40px;color:var(--slate);font-size:.86rem}
+  /* ===== 頁尾校區目錄 (site-wide) ===== */
+  footer{padding:clamp(34px,4vw,48px) 0 40px;color:var(--slate);font-size:.86rem;border-top:1px solid var(--line);background:#fff}
+  .foot-campuses{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:26px}
+  @media(max-width:860px){.foot-campuses{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.foot-campuses{grid-template-columns:1fr}}
+  .foot-campuses .loc{background:transparent;border:none;border-radius:0;padding:0;border-left:3px solid var(--blue-tint);padding-left:14px}
+  .foot-campuses .loc h3{font-size:1rem;font-weight:900;margin-bottom:6px;color:var(--ink)}
+  .foot-campuses .loc .fc-stage{font-size:.76rem;font-weight:700;color:var(--blue);margin-bottom:6px}
+  .foot-campuses .loc p{font-size:.84rem;color:var(--slate);margin:0;line-height:1.7}
+  .foot-campuses .loc a.fc-tel{display:inline-block;margin-top:2px;font-size:.92rem;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+  .foot-campuses .loc a.fc-tel:hover{text-decoration:underline}
+  .foot-campuses .loc.loc-hl{border-left-color:var(--blue);box-shadow:none}
+  .foot-contact{display:flex;gap:10px 26px;flex-wrap:wrap;padding:14px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-size:.86rem;margin-bottom:18px}
+  .foot-contact b{color:var(--ink)}
+  .foot-contact .cta-link{color:var(--orange);font-weight:800;margin-left:auto}
+  .foot-contact .cta-link:hover{text-decoration:underline}
   .foot-in{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:baseline}
   .foot-in .couplet{font-weight:800;color:var(--ink)}
   .foot-in .couplet .b{color:var(--blue)}
@@ -304,7 +319,7 @@
           <a href="senior.html">高中部<small>高一～高三</small></a>
         </div>
       </div>
-      <a href="index.html#locations">校區資訊</a>
+      <a href="#campuses">校區資訊</a>
       <a href="index.html#results">升學成果</a>
       <a href="index.html#faq">常見問題</a>
       <a href="parent/">家長專區</a>
@@ -420,11 +435,28 @@
   </div>
 </section>
 
-<footer>
-  <div class="wrap foot-in">
-    <span class="couplet">成果，<span class="b">會說話</span>。進步，看得見。</span>
-    <span>家偉文理補習班 · 頭份・竹南・新竹 · © 2026</span>
-    <span>學生個資與成果公開均經家長書面同意</span>
+<footer id="campuses">
+  <div class="wrap">
+    <div class="foot-campuses">
+      <div class="loc"><h3>頭份班</h3><div class="fc-stage">國小・國中</div>
+        <p>苗栗縣頭份市建國路 52 號</p><a class="fc-tel" href="tel:037682000">(037) 682-000</a></div>
+      <div class="loc"><h3>竹南班</h3><div class="fc-stage">國小・國中</div>
+        <p>苗栗縣竹南鎮中正路 287 號</p><a class="fc-tel" href="tel:037465222">(037) 465-222</a></div>
+      <div class="loc"><h3>新竹班</h3><div class="fc-stage">國中</div>
+        <p>新竹市關新路 18 號</p><a class="fc-tel" href="tel:036662865">(03) 666-2865</a></div>
+      <div class="loc"><h3>高中班</h3><div class="fc-stage">高中</div>
+        <p>苗栗縣竹南鎮中正路 185 號</p><a class="fc-tel" href="tel:037465566">(037) 46-5566</a></div>
+    </div>
+    <div class="foot-contact">
+      <span><b>LINE</b> @chiawei</span>
+      <span><b>櫃檯</b> 週一至週六 14:00–22:00</span>
+      <a class="cta-link" href="#cta">預約免費檢測 →</a>
+    </div>
+    <div class="foot-in">
+      <span class="couplet">成果，<span class="b">會說話</span>。進步，看得見。</span>
+      <span>家偉文理補習班 · 頭份・竹南・新竹 · © 2026</span>
+      <span><a href="parent/">家長專區</a> · <a href="legal/privacy-v1.html">個資保護說明</a> · 學生個資與成果公開均經家長書面同意</span>
+    </div>
   </div>
 </footer>
 <div class="stickybar">
