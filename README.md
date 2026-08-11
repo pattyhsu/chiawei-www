@@ -30,14 +30,17 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 3. 同意文 (`legal/privacy-v1.html`) needs owner sign-off before the first real
    parent binds.
 
-## DNS (GoDaddy — this domain is deliberately NOT on Cloudflare)
+## DNS (Namecheap BasicDNS since 2026-08-11 — deliberately NOT on Cloudflare)
 
-Order matters — Pages checks DNS **once** when the custom domain is set and
-never retries (learned on chiawei-admin):
+**LIVE at https://www.chiaweiedu.com since 2026-08-11** (cert issued, HTTPS
+enforced). The zone moved GoDaddy → Namecheap (registrar transfer) that day;
+records now live in Namecheap → chiaweiedu.com → Advanced DNS:
 
-1. GoDaddy: `www` CNAME → `pattyhsu.github.io`; apex → forward to
-   `https://www.chiaweiedu.com`.
-2. ONLY THEN commit + push the `CNAME` file (content: `www.chiaweiedu.com`) —
-   it is deliberately left out of the repo until DNS resolves. Pages picks it
-   up and issues the cert; turn on Enforce HTTPS.
-3. If the cert ever goes null: remove `CNAME`, push, re-add, push.
+- `www` CNAME → `pattyhsu.github.io` (this site)
+- `admin` CNAME → `pattyhsu.github.io` (chiawei-admin)
+- `@` URL Redirect (301) → `https://www.chiaweiedu.com`
+- MAIL SETTINGS → Gmail preset (the school's Google Workspace MX — do NOT
+  remove; without it school email silently queues then bounces)
+
+If the Pages cert ever goes null (Pages checks DNS once, never retries):
+remove `CNAME`, push, re-add, push (learned on chiawei-admin).
