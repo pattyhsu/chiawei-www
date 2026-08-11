@@ -262,8 +262,14 @@
 
   /* ===== CTA + contact ===== */
   .ctaband{background:linear-gradient(150deg,var(--blue),var(--blue-ink));color:#fff}
-  .cta-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(24px,4vw,48px);align-items:center}
-  @media(max-width:820px){.cta-grid{grid-template-columns:1fr}}
+  /* copy 左、表單右；手機時表單排在聯絡資訊之前（主要動作優先） */
+  .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,52px);align-items:start;
+    grid-template-areas:"copy form" "contact form"}
+  .cta-copy{grid-area:copy}
+  .cta-grid>.leadform{grid-area:form}
+  .cta-grid>.contact{grid-area:contact;background:transparent;border:none;border-top:1px dashed rgba(255,255,255,.24);border-radius:0;padding:16px 0 0;margin-top:4px}
+  .cta-grid>.contact div{margin-bottom:6px}
+  @media(max-width:820px){.cta-grid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "contact"}}
   .ctaband h2{font-size:clamp(1.6rem,3.8vw,2.4rem);font-weight:900;letter-spacing:.02em}
   .ctaband h2 .g{background:linear-gradient(transparent 68%,rgba(248,196,20,.9) 68% 94%,transparent 94%);padding:0 .05em}
   .ctaband p{color:#C6D2FF;margin-top:10px}
@@ -580,15 +586,15 @@
 <!-- ===== CTA + 聯絡 ===== -->
 <section class="ctaband" id="cta">
   <div class="wrap cta-grid">
-    <div>
+    <div class="cta-copy">
       <h2>下一個<span class="g">看得見的進步</span>，<br>從一份免費檢測開始</h2>
       <p>免費觀念檢測＋試聽一堂課——當天帶走孩子的診斷報告，看見強弱項再決定。名額依班別安排，建議先預約。</p>
-      <div class="leadform" style="margin-top:22px">
+    </div>
+    <div class="leadform">
         <div class="lf-t">線上預約｜免費觀念檢測</div>
         <div class="lf-s">留下聯絡方式，我們會在一個工作天內回電安排時間。</div>
         <div data-lead-form data-page="index" data-stages="國小,國中,高中"></div>
       </div>
-    </div>
     <div class="contact">
       <div style="margin-bottom:14px;color:#fff;font-weight:800">也可以直接聯絡我們</div>
       <div><b>電話</b><span>頭份 (037) 682-000｜竹南 (037) 465-222</span></div>
