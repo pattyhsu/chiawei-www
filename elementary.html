@@ -23,7 +23,7 @@
     --blue:#2547C7; --blue-deep:#1A2F86; --blue-ink:#0F1C4D;
     --gold:#F8C414; --data-gold:#D9A400; --orange:#EF5226; --orange-deep:#D5431B; --mid-blue:#5B85DC;
     --blue-tint:#EEF1FC; --gold-tint:#FEF6DA; --orange-tint:#FDEAE3;
-    --maxw:1120px;
+    --maxw:1200px;
     --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
     --serif:"Noto Serif TC","Songti TC","Source Han Serif TC",serif;
   }
@@ -31,7 +31,7 @@
   html{scroll-behavior:smooth}
   body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.75;-webkit-font-smoothing:antialiased}
   .num{font-variant-numeric:tabular-nums lining-nums}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(14px,2.6vw,24px)}
   h1,h2,h3,p{margin:0}
   a{color:inherit;text-decoration:none}
   section{padding:clamp(44px,6vw,76px) 0}
@@ -43,12 +43,12 @@
   .demo-badge{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.12em;padding:3px 10px;border-radius:999px;background:rgba(248,196,20,.16);color:#8A6A00;border:2px dashed var(--data-gold);vertical-align:middle}
 
   /* ===== nav ===== */
-  nav{position:sticky;top:0;z-index:50;background:rgba(245,247,252,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .nav-in{max-width:var(--maxw);margin:0 auto;padding:12px clamp(16px,4vw,32px);display:flex;align-items:center;gap:24px}
-  .logo-slot{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.05em;font-size:1.06rem}
-  .logo-slot svg,.logo-slot img{height:40px;width:auto;display:block}
-  .logo-slot .en{font-size:.66rem;letter-spacing:.32em;color:var(--slate);font-weight:600;display:block;margin-top:1px}
-  .nav-links{margin-left:auto;display:flex;gap:20px;font-size:.94rem;font-weight:600;color:#33384c}
+  nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:var(--maxw);margin:0 auto;padding:6px clamp(14px,2.6vw,24px);display:flex;align-items:center;gap:24px}
+  .logo-slot{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.05em;font-size:.98rem}
+  .logo-slot svg,.logo-slot img{height:32px;width:auto;display:block}
+  .logo-slot .en{font-size:.6rem;letter-spacing:.3em;color:var(--slate);font-weight:600;display:block;margin-top:0}
+  .nav-links{margin-left:auto;display:flex;gap:18px;font-size:.92rem;font-weight:600;color:#33384c}
   .nav-links a:hover{color:var(--blue)}
   /* 班別課程 dropdown */
   .navdrop{position:relative}
@@ -66,13 +66,14 @@
   .btn:active{transform:scale(.98)}
   .btn-cta{background:var(--orange);color:#fff;font-size:1.19rem;padding:12px 26px}
   .btn-cta:hover{background:var(--orange-deep)}
-  .btn-cta.small{font-size:1.19rem;padding:8px 18px}
+  .btn-cta.small{font-size:1.02rem;padding:7px 16px}
   .btn-ghost{border:2px solid var(--blue);color:var(--blue);font-size:1.02rem;padding:11px 24px;background:#fff}
   .btn-ghost:hover{background:var(--blue-tint)}
   @media(max-width:900px){.nav-links{display:none}}
 
   /* ===== hero (conversion-first, slim) ===== */
-  .hero{padding:clamp(28px,3.6vw,48px) 0 clamp(30px,3.6vw,48px)}
+  /* 第一屏用白底，和下方灰底的內容區分開 */
+  .hero{padding:clamp(28px,3.6vw,48px) 0 clamp(34px,4vw,54px);background:#fff;border-bottom:1px solid var(--line)}
   .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,5vw,52px);align-items:center}
   @media(max-width:920px){.hero-grid{grid-template-columns:1fr}}
   .openchip{display:inline-flex;align-items:center;gap:8px;background:var(--orange-tint);border:1px solid #F3D0B8;color:#B8431C;font-weight:800;font-size:.85rem;border-radius:999px;padding:5px 14px;margin-bottom:14px}
