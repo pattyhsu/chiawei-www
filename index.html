@@ -94,7 +94,7 @@
   @media(max-width:900px){.nav-links{display:none}}
 
   /* ===== hero (conversion-first, slim) ===== */
-  .hero{padding:clamp(38px,5vw,64px) 0 clamp(40px,5vw,64px)}
+  .hero{padding:clamp(28px,3.6vw,48px) 0 clamp(30px,3.6vw,48px)}
   .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,5vw,52px);align-items:center}
   @media(max-width:920px){.hero-grid{grid-template-columns:1fr}}
   .openchip{display:inline-flex;align-items:center;gap:8px;background:var(--orange-tint);border:1px solid #F3D0B8;color:#B8431C;font-weight:800;font-size:.85rem;border-radius:999px;padding:5px 14px;margin-bottom:14px}
@@ -102,14 +102,17 @@
   .hero h1{font-size:clamp(2.1rem,5.2vw,3.4rem);font-weight:900;line-height:1.3;letter-spacing:.01em;text-wrap:balance}
   .hero h1 .hl{background:linear-gradient(transparent 68%,var(--gold) 68% 94%,transparent 94%);padding:0 .04em}
   .hero h1 .l2{color:var(--blue)}
-  .hero .lede{margin-top:16px;font-size:clamp(1rem,1.8vw,1.12rem);color:#33384c;max-width:44ch}
-  .hero-ctas{display:flex;gap:14px;margin-top:24px;flex-wrap:wrap}
-  .ctanote{margin-top:12px;font-size:.9rem;color:var(--slate);max-width:46ch}
+  .hero .lede{margin-top:14px;font-size:clamp(1rem,1.8vw,1.12rem);color:#33384c;max-width:44ch}
+  .hero-ctas{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:center}
+  /* 主 CTA 是唯一的大聲量；電話詢問降一級 */
+  .hero .hero-ctas .btn-ghost{font-size:1rem;padding:10px 20px;border-width:1.5px}
+  .ctanote{margin-top:10px;font-size:.9rem;color:var(--slate);max-width:46ch}
   .ctanote b{color:var(--ink)}
-  .router{display:flex;gap:10px;margin-top:22px;align-items:center;flex-wrap:wrap}
-  .router .rt-l{font-size:.9rem;font-weight:800;color:var(--slate);flex-basis:100%}
-  .router a{flex:1;min-width:96px;text-align:center;border:2px solid var(--blue);border-radius:12px;padding:13px 10px;font-weight:900;font-size:1.08rem;color:var(--blue);background:#fff;transition:background .12s ease}
-  .router a:hover{background:var(--blue-tint)}
+  /* 年段選擇＝次要導覽，不與主 CTA 爭視覺重量 */
+  .router{display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap}
+  .router .rt-l{font-size:.86rem;font-weight:700;color:var(--slate)}
+  .router a{border-radius:999px;padding:5px 14px;font-weight:700;font-size:.92rem;color:var(--blue-deep);background:var(--blue-tint);transition:background .12s ease}
+  .router a:hover{background:#DDE4FA}
   .cls{scroll-margin-top:84px}
   .cls.cls-focus{box-shadow:0 0 0 3px var(--blue);transition:box-shadow .3s ease}
   .stickybar{position:fixed;bottom:0;left:0;right:0;display:none;z-index:60;box-shadow:0 -6px 20px rgba(15,28,77,.16)}
@@ -119,7 +122,7 @@
   @media(max-width:900px){.stickybar{display:flex} body{padding-bottom:58px}}
   .loc.loc-hl{border:2px solid var(--blue);box-shadow:0 12px 30px -18px rgba(37,71,199,.5)}
   .loc .loc-tag{display:inline-block;background:var(--blue);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.08em;border-radius:999px;padding:2px 10px;margin-bottom:8px}
-  .trust{display:flex;gap:8px 22px;margin-top:22px;flex-wrap:wrap;font-size:.86rem;color:var(--slate)}
+  .trust{display:flex;gap:8px 20px;margin-top:16px;flex-wrap:wrap;font-size:.86rem;color:var(--slate)}
   .trust b{color:var(--ink)}
   .trust span{display:inline-flex;align-items:center;gap:7px}
   .trust i{width:8px;height:8px;border-radius:3px;background:var(--blue);display:inline-block}
@@ -371,17 +374,17 @@
       <span class="openchip"><i></i>國小～高中 本學期插班・暑期先修班 招生中</span>
       <h1><span class="hl">成果，會說話。</span><br><span class="l2">進步，看得見。</span></h1>
       <p class="lede">三十年文理補習班，<strong>國小、國中、高中</strong>分年段開班。每一題都標記到觀念——您每一週都看得見孩子哪裡懂了、哪裡還要加強。</p>
+      <div class="hero-ctas">
+        <a class="btn btn-cta" href="#cta">預約免費觀念檢測</a>
+        <a class="btn btn-ghost" href="tel:037682000">電話詢問</a>
+      </div>
+      <p class="ctanote">檢測約 30–40 分鐘＋試聽一堂課——<b>當天帶走孩子的「觀念診斷報告」</b>，看不看班都帶得走。</p>
       <div class="router">
         <span class="rt-l">我的孩子在…</span>
         <a href="elementary.html">國小</a>
         <a href="junior.html">國中</a>
         <a href="senior.html">高中</a>
       </div>
-      <div class="hero-ctas">
-        <a class="btn btn-cta" href="#cta">預約免費觀念檢測</a>
-        <a class="btn btn-ghost" href="tel:037682000">電話詢問</a>
-      </div>
-      <p class="ctanote">檢測約 30–40 分鐘＋試聽一堂課——<b>當天帶走孩子的「觀念診斷報告」</b>，看不看班都帶得走。</p>
       <div class="trust">
         <span><i></i><b>三十年</b>在地教學</span>
         <span><i></i><b>四校區</b>：頭份・竹南・新竹</span>
