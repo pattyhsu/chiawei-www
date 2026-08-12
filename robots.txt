@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /parent/
 
-Sitemap: https://www.chiaweiedu.com/sitemap.xml
+Sitemap: https://chiaweiedu.com/sitemap.xml

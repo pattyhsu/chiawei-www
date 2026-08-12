@@ -1,6 +1,6 @@
 # chiawei-www — 家偉文理補習班 官網 + 家長專區
 
-Public repo → GitHub Pages → **https://www.chiaweiedu.com** (same deployment
+Public repo → GitHub Pages → **https://chiaweiedu.com** (same deployment
 pattern as `chiawei-admin`). Static only: no server, no build step. The pages
 talk straight to Supabase PostgREST with the **anon key** (public by design);
 **RLS is the entire security boundary** — nothing in this repo is one.
@@ -32,15 +32,32 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 
 ## DNS (Namecheap BasicDNS since 2026-08-11 — deliberately NOT on Cloudflare)
 
-**LIVE at https://www.chiaweiedu.com since 2026-08-11** (cert issued, HTTPS
-enforced). The zone moved GoDaddy → Namecheap (registrar transfer) that day;
-records now live in Namecheap → chiaweiedu.com → Advanced DNS:
+**Canonical host is the APEX: https://chiaweiedu.com** (live 2026-08-11, HTTPS
+enforced). `www` 301-redirects to it — GitHub Pages does that itself because
+the `CNAME` file holds the apex. The zone moved GoDaddy → Namecheap (registrar
+transfer) 2026-08-11; records live in Namecheap → chiaweiedu.com → Advanced DNS:
 
+- `@` **four A records** → `185.199.108.153` / `.109.153` / `.110.153` / `.111.153`
+  (GitHub Pages). NOT a URL Redirect record — Namecheap's redirect service
+  answers plain HTTP only, so `https://chiaweiedu.com` timed out under it.
 - `www` CNAME → `pattyhsu.github.io` (this site)
 - `admin` CNAME → `pattyhsu.github.io` (chiawei-admin)
-- `@` URL Redirect (301) → `https://www.chiaweiedu.com`
 - MAIL SETTINGS → Gmail preset (the school's Google Workspace MX — do NOT
   remove; without it school email silently queues then bounces)
 
-If the Pages cert ever goes null (Pages checks DNS once, never retries):
-remove `CNAME`, push, re-add, push (learned on chiawei-admin).
+### ⚠️ The cert-scoping trap (cost a day, 2026-08-11→12)
+
+**GitHub Pages scopes the TLS cert to whatever `CNAME` held when it provisioned,
+and never widens it on its own.** The first cert was issued while `CNAME` said
+`www.chiaweiedu.com` and the apex still pointed at Namecheap's redirect IP, so
+it named `www` only. After the apex A records were fixed, GitHub kept serving
+that still-valid cert and fell back to its generic `*.github.io` cert for the
+apex → `ERR_CERT_COMMON_NAME_INVALID`. Waiting does not fix it (nothing
+re-triggers issuance while a valid cert exists) and repeated remove/re-add of
+the custom domain only restarts the clock.
+
+**The fix that works: put the host you want covered in `CNAME`.** Setting it to
+the apex made the API report `domains: [chiaweiedu.com, www.chiaweiedu.com]`
+within seconds. Diagnose with the handshake, not the API:
+`curl -sv https://chiaweiedu.com/ 2>&1 | grep subject` — if it says
+`CN=*.github.io`, Pages does not have a cert for that name.
