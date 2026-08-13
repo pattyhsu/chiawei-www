@@ -170,6 +170,22 @@
   .cls .sched{font-size:.84rem;color:var(--slate);border-top:1px dashed var(--line);padding-top:10px}
   .cls .sched b{color:var(--ink)}
   .cls .btn-ghost{margin-top:auto;font-size:.95rem;padding:9px 18px;text-align:center}
+  /* 整張卡可點 (stretched link): the 了解○○部 anchor stays the ONE real link —
+     its ::after overlays the whole card. Do NOT wrap .cls in an <a> instead:
+     that would make the card's entire text one link name for a screen reader.
+     ⚠ If a card ever gains a SECOND link (e.g. 校區 → 校區資訊), that link needs
+     position:relative;z-index:1 or the overlay will swallow it. Text selection
+     inside the card is also disabled by the overlay — fine for a nav card. */
+  .cls .btn-ghost::after{content:"";position:absolute;inset:0;border-radius:16px}
+  .cls{position:relative;transition:transform .15s ease,box-shadow .15s ease}
+  .cls:hover{transform:translateY(-2px);cursor:pointer}
+  /* :not(.cls-focus) so hovering doesn't wipe the router's temporary highlight */
+  .cls:not(.cls-focus):hover{box-shadow:0 10px 26px -12px rgba(37,71,199,.34)}
+  .cls:hover .btn-ghost{background:var(--blue-tint)}
+  /* keyboard: focus lands on the button, but the ring belongs on the whole target */
+  .cls:focus-within{outline:3px solid var(--blue);outline-offset:3px}
+  .cls .btn-ghost:focus-visible{outline:none}
+  @media(prefers-reduced-motion:reduce){.cls,.cls:hover{transition:none;transform:none}}
   .classnote{margin-top:14px;font-size:.85rem;color:var(--slate)}
 
   /* ===== locations ===== */
