@@ -35,6 +35,10 @@
   h1,h2,h3,p{margin:0}
   a{color:inherit;text-decoration:none}
   section{padding:clamp(44px,6vw,76px) 0}
+  /* Consecutive plain sections share ONE gap: the bottom padding of the one above.
+     A section that follows a coloured band (or the hero) has no such gap to lean on,
+     so it keeps its own top padding — otherwise its eyebrow sits flush against the edge. */
+  section:not(.band):not(.ctaband) + section:not(.band):not(.ctaband){padding-top:0}
   .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:.6em}
   .eyebrow::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--gold),var(--blue))}
   .sec-head{margin-bottom:clamp(20px,3vw,30px)}
@@ -396,7 +400,7 @@
   </div>
 </section>
 
-<section id="why" style="padding-top:0">
+<section id="why">
   <div class="wrap">
     <div class="sec-head"><div class="eyebrow">為什麼選家偉高中部</div><h2>三件事，做到學測那天</h2></div>
     <div class="steps3">
@@ -426,7 +430,7 @@
   </div>
 </section>
 
-<section id="enroll" style="padding-top:0">
+<section id="enroll">
   <div class="wrap">
     <div class="sec-head"><div class="eyebrow">報名流程 · 3 步驟</div><h2>先檢測＋試聽，再決定</h2><p class="sub">我們在<b>一個工作天內</b>回電，檢測時間依您方便安排；前兩步完全免費，看完報告再決定。</p></div>
     <div class="enroll" style="margin-top:26px">
@@ -437,7 +441,7 @@
   </div>
 </section>
 
-<section id="faq" style="padding-top:0">
+<section id="faq">
   <div class="wrap">
     <div class="sec-head"><div class="eyebrow">常見問題</div><h2>高中生（和家長）最常問</h2></div>
     <div class="faq">
@@ -480,7 +484,7 @@
     <div class="foot-in">
       <span class="couplet">成果，<span class="b">會說話</span>。進步，看得見。</span>
       <span>家偉文理補習班 · 頭份・竹南・新竹 · © 2026</span>
-      <span><a href="legal/privacy-v1.html">個資保護說明</a> · 學生個資與成果公開均經家長書面同意</span>
+      <span><a href="legal/privacy-v1.html">個資保護說明</a></span>
     </div>
   </div>
 </footer>

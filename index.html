@@ -58,6 +58,10 @@
   h1,h2,h3,p{margin:0}
   a{color:inherit;text-decoration:none}
   section{padding:clamp(44px,6vw,76px) 0}
+  /* Consecutive plain sections share ONE gap: the bottom padding of the one above.
+     A section that follows a coloured band (or the hero) has no such gap to lean on,
+     so it keeps its own top padding — otherwise its eyebrow sits flush against the edge. */
+  section:not(.band):not(.ctaband) + section:not(.band):not(.ctaband){padding-top:0}
   .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:.6em}
   .eyebrow::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--gold),var(--blue))}
   .sec-head{margin-bottom:clamp(20px,3vw,30px)}
@@ -630,7 +634,7 @@
        * 旻軒 / 昇哥's lines are drafts written to describe the school's method
          (診斷 → 對症 → 精熟) as practised, approved by Patty 2026-08-13. If either
          teacher gives real detail, prefer it over the method restatement. -->
-<section id="teachers" style="padding-top:0">
+<section id="teachers">
   <div class="wrap">
     <div class="sec-head">
       <div class="eyebrow">師資 · Teachers</div>
@@ -662,7 +666,7 @@
 <!-- 校區資訊 lives in the site-wide footer (#campuses) — not a section of its own. -->
 
 <!-- ===== 報名流程 ===== -->
-<section id="enroll" style="padding-top:0">
+<section id="enroll">
   <div class="wrap">
     <div class="sec-head">
       <div class="eyebrow">報名流程 · 3 步驟</div>
@@ -677,7 +681,7 @@
 </section>
 
 <!-- ===== FAQ ===== -->
-<section id="faq" style="padding-top:0">
+<section id="faq">
   <div class="wrap">
     <div class="sec-head">
       <div class="eyebrow">常見問題 · FAQ</div>
@@ -736,7 +740,7 @@
     <div class="foot-in">
       <span class="couplet">成果，<span class="b">會說話</span>。進步，看得見。</span>
       <span>家偉文理補習班 · 頭份・竹南・新竹 · © 2026</span>
-      <span><a href="legal/privacy-v1.html">個資保護說明</a> · 學生個資與成果公開均經家長書面同意</span>
+      <span><a href="legal/privacy-v1.html">個資保護說明</a></span>
     </div>
   </div>
 </footer>
