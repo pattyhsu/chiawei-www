@@ -252,6 +252,10 @@
   .voice p{font-family:var(--serif);margin-top:8px;font-size:1rem;line-height:1.85;color:#22305F}
 
   /* ===== teachers ===== */
+  /* .teachers/.tch — UNUSED since the 師資 section was removed 2026-08-13 (see the
+     comment where that section was). Kept because a real 師資 grid may return once
+     there are real teachers to name; delete these 7 rules if the story section
+     lands instead and the grid is not coming back. */
   .teachers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
   @media(max-width:760px){.teachers{grid-template-columns:1fr}}
   .tch{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center}
@@ -548,21 +552,22 @@
   </div>
 </section>
 
-<!-- ===== 師資 ===== -->
-<section id="teachers" style="padding-top:0">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">師資 · Teachers</div>
-      <h2>三十年，創辦人仍親自帶一班</h2>
-      <p class="sub">不是掛名——三十年後的今天，創辦人仍固定帶一班，親自站上講台。</p>
-    </div>
-    <div class="teachers">
-      <div class="tch"><div class="avatar" style="background:var(--blue)">家</div><h3>家偉老師</h3><div class="sub2">創辦人 · 數學 30 年</div><p>三十年只做一件事：把每一種題型教到孩子從根本弄懂。</p></div>
-      <div class="tch"><div class="avatar" style="background:var(--data-gold)">理</div><h3>○○老師</h3><div class="sub2">理化 · 15 年</div><p>把抽象的理化變成看得見的實驗與生活例子。</p></div>
-      <div class="tch"><div class="avatar" style="background:var(--orange)">英</div><h3>○○老師</h3><div class="sub2">英語 · 12 年</div><p>從文法地基到會考閱讀，一步一步帶上來。</p></div>
-    </div>
-  </div>
-</section>
+<!-- ===== 師資 — REMOVED 2026-08-13 (Patty) =====
+     Two of the three cards were INVENTED (○○老師 / 理化 15 年 / 英語 12 年 came
+     from the brand template, not from real teachers) and were live with no 示意
+     badge. The heading also overstated: it read 創辦人仍親自帶班, but the founder
+     teaches one class now.
+
+     Deliberately NOT replaced with a corrected 師資 grid — naming real teachers
+     is a bigger commitment (credentials, photos, their consent). The intended
+     replacement is a **三十年 story section** (the 支柱 that makes 我們的方法
+     believable, and the thing a chain can't copy); it is waiting on real
+     material from Patty, because inventing an origin story would repeat the
+     exact mistake this removal fixes.
+
+     Worth keeping when that section is written — Patty confirmed this line true:
+       「三十年只做一件事：把每一種題型教到孩子從根本弄懂。」
+     Full markup: git show 8d343ca:index.html -->
 
 <!-- 校區資訊 lives in the site-wide footer (#campuses) — not a section of its own. -->
 
