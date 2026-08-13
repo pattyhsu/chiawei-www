@@ -166,6 +166,24 @@
   .roll ul{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
   .roll li{font-family:var(--serif);font-size:1.06rem;display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed rgba(255,255,255,.14);padding-bottom:9px}
   .roll li b{color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* 榜單牆 — text only, packed dense so the NUMBER of names is what registers.
+     ⚠️ `.roll ul` above sets flex-column at specificity (0,1,1), so these MUST
+     stay `.roll ul.namewall` — a bare `.namewall` (0,1,0) silently loses and
+     every name takes a full row. (Bit us on index.html; same trap here.) */
+  .rollhead{font-size:.82rem;letter-spacing:.06em;font-weight:800;color:#fff;
+    margin:20px 0 8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+  .rollhead:first-of-type{margin-top:14px;padding-top:0;border-top:0}
+  .roll ul.namewall{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:1px 14px}
+  .roll ul.namewall li{font-family:var(--sans);font-size:.88rem;padding:4px 0;display:flex;
+    align-items:baseline;gap:6px;border-bottom:1px dashed rgba(255,255,255,.10);white-space:nowrap}
+  .roll ul.namewall li b{color:var(--gold);font-variant-numeric:tabular-nums;margin-left:auto;font-size:.84rem}
+  .roll ul.namewall.univ{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:2px 18px}
+  .roll ul.namewall.univ li{flex-wrap:wrap;white-space:normal;padding:6px 0}
+  .roll ul.namewall.univ li b{margin-left:0;color:#fff;font-size:.88rem}
+  .roll ul.namewall.univ li small{width:100%;font-size:.74rem;color:#9DB2FF;margin-top:1px}
+  .setnote{margin-top:8px;font-size:.78rem;color:#8FA0D8}
+  .rollnote{margin-top:14px;font-size:.84rem;color:#8FA0D8}
   .leaps{display:flex;flex-direction:column;gap:10px}
   .leapchip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 18px;display:flex;align-items:baseline;gap:10px}
   .leapchip .w{font-size:.8rem;color:#AFC0FF;width:8em}
@@ -384,6 +402,27 @@
     <div class="steps3">
       <div class="step"><div class="n num">1</div><h3>銜接</h3><p>高一上就是深水區：先把國中到高中的觀念斷層接起來。</p></div><div class="step"><div class="n num">2</div><h3>深挖</h3><p>公式背不完，觀念挖到根本就不用背——題目再變也認得出來。</p></div><div class="step"><div class="n num">3</div><h3>收服</h3><p>學測題型一類一類練到穩，週日學測班總複習。</p></div>
     </div>
+  </div>
+</section>
+
+<!-- ===== 榜單 · 高中部 =====
+     Transcribed from the school's real 大學錄取 poster (source image kept at
+     photos/roll/roll-senior-univ.jpg, not displayed). The poster states NO year,
+     so none is claimed — Patty to supply. Names keep the poster's ○ masking;
+     the 就讀高中 is on the poster too and is kept because it is what makes the
+     list checkable. -->
+<section class="band" id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">升學成果 · 高中部</div>
+      <h2>考上的大學，和他們是從哪一所高中考上的</h2>
+      <p class="sub">名單比形容詞有用。這裡是家偉高中部的孩子考取的大學與科系。</p>
+    </div>
+    <div class="roll roll-wide">
+      <div class="rt"><span>榜單牆 · 大學錄取</span></div>
+      <ul class="namewall univ"><li>磐石高中 鍾○瑄 <b>國立清華大學</b><small>計量財務金融學系</small></li><li>君毅高中 吳○諺 <b>國立中興大學</b><small>獸醫學系</small></li><li>竹南高中 黃○晴 <b>國立中央大學</b><small>財務金融學系</small></li><li>君毅高中 張○銪 <b>國立成功大學</b><small>統計與資料科學學系</small></li><li>竹南高中 林○妤 <b>國立中興大學</b><small>動物科學系</small></li><li>興華高中 陳○茵 <b>國立政治大學</b><small>財政學系</small></li><li>君毅高中 劉○銨 <b>國立中央大學</b><small>光電學系</small></li><li>君毅高中 劉○彤 <b>國立政治大學</b><small>財政學系</small></li><li>竹南高中 鍾○辰 <b>國立海洋大學</b><small>航運管理學系</small></li><li>君毅高中 羅○晴 <b>國立台北大學</b><small>經濟學系</small></li><li>竹南高中 林○富 <b>國立高雄師範大學</b><small>軟體工程與管理學系</small></li><li>竹南高中 胡○文 <b>國立高雄師範大學</b><small>特殊教育學系</small></li><li>君毅高中 陳○軒 <b>國立海洋大學</b><small>水產養殖學系</small></li><li>君毅高中 溫○筠 <b>國立嘉義大學</b><small>農藝學系</small></li><li>君毅高中 何○軒 <b>國立宜蘭大學</b><small>土木工程學系</small></li><li>君毅高中 徐○彧 <b>國立宜蘭大學</b><small>應用經濟管理學系</small></li><li>竹南高中 陳○廷 <b>高雄醫學大學</b><small>放射學系</small></li><li>興華高中 柳○言 <b>國立台東大學</b><small>英美語文學系</small></li><li>興華高中 鄭○樂 <b>中國醫藥大學</b><small>公共衛生學系</small></li></ul>
+    </div>
+    <p class="rollnote">以上皆為校區實際張貼之榜單，姓名依慣例遮字。</p>
   </div>
 </section>
 

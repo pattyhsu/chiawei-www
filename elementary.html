@@ -166,6 +166,24 @@
   .roll ul{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
   .roll li{font-family:var(--serif);font-size:1.06rem;display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed rgba(255,255,255,.14);padding-bottom:9px}
   .roll li b{color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* 榜單牆 — text only, packed dense so the NUMBER of names is what registers.
+     ⚠️ `.roll ul` above sets flex-column at specificity (0,1,1), so these MUST
+     stay `.roll ul.namewall` — a bare `.namewall` (0,1,0) silently loses and
+     every name takes a full row. (Bit us on index.html; same trap here.) */
+  .rollhead{font-size:.82rem;letter-spacing:.06em;font-weight:800;color:#fff;
+    margin:20px 0 8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+  .rollhead:first-of-type{margin-top:14px;padding-top:0;border-top:0}
+  .roll ul.namewall{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:1px 14px}
+  .roll ul.namewall li{font-family:var(--sans);font-size:.88rem;padding:4px 0;display:flex;
+    align-items:baseline;gap:6px;border-bottom:1px dashed rgba(255,255,255,.10);white-space:nowrap}
+  .roll ul.namewall li b{color:var(--gold);font-variant-numeric:tabular-nums;margin-left:auto;font-size:.84rem}
+  .roll ul.namewall.univ{grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:2px 18px}
+  .roll ul.namewall.univ li{flex-wrap:wrap;white-space:normal;padding:6px 0}
+  .roll ul.namewall.univ li b{margin-left:0;color:#fff;font-size:.88rem}
+  .roll ul.namewall.univ li small{width:100%;font-size:.74rem;color:#9DB2FF;margin-top:1px}
+  .setnote{margin-top:8px;font-size:.78rem;color:#8FA0D8}
+  .rollnote{margin-top:14px;font-size:.84rem;color:#8FA0D8}
   .leaps{display:flex;flex-direction:column;gap:10px}
   .leapchip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 18px;display:flex;align-items:baseline;gap:10px}
   .leapchip .w{font-size:.8rem;color:#AFC0FF;width:8em}
@@ -400,6 +418,28 @@
       <div class="row"><b>要收費嗎</b><span class="txt">免費，也不綁報名——報告直接帶回家</span></div>
       <div class="hero-ctas" style="margin-top:18px"><a class="btn btn-cta" href="#cta">預約國中銜接檢測</a></div>
     </div>
+  </div>
+</section>
+
+<!-- ===== 榜單 · 國小部 =====
+     Transcribed from the school's real 私校 poster (source image kept at
+     photos/roll/roll-elem-private.jpg, not displayed). The poster itself states
+     115, so that year IS claimed here; names keep the poster's ○ masking. -->
+<section class="band" id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">升學成果 · 國小部</div>
+      <h2>私校考試，考上的孩子</h2>
+      <p class="sub">名單比形容詞有用。這裡是國小部考取私中的孩子——每一個，我們都說得出他是怎麼考上的。</p>
+    </div>
+    <div class="roll roll-wide">
+      <div class="rt"><span>榜單牆 · 115 私校考試</span></div>
+      <h3 class="rollhead">錄取 · 新竹曙光</h3>
+      <ul class="namewall"><li>黃○豪</li><li>羅○喬</li></ul>
+      <h3 class="rollhead">錄取 · 君毅國中</h3>
+      <ul class="namewall"><li>黃○瑛</li><li>黃○琁</li><li>謝○鴻</li><li>林○亦</li><li>廖○恩</li><li>吳○晏</li><li>陳○希</li><li>徐○益</li><li>溫○勳</li><li>張○丞</li></ul>
+    </div>
+    <p class="rollnote">以上皆為校區實際張貼之榜單，姓名依慣例遮字。</p>
   </div>
 </section>
 
