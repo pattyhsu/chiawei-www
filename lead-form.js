@@ -20,11 +20,10 @@
     "國中": ["國一", "國二", "國三"],
     "高中": ["高一", "高二", "高三"],
   };
-  var SUBJECTS = {
-    "國小": ["數學", "國語", "英語", "尚未決定"],
-    "國中": ["數學", "理化", "英語", "國文", "社會", "尚未決定"],
-    "高中": ["數學", "物理", "化學", "英文", "尚未決定"],
-  };
+  // One list for every 學階 (Patty's call, 2026-08-13): these four are what the
+  // school actually teaches, so 國小/國中/高中 all show the same chips. Do NOT
+  // re-split this per stage — 國語/英語/社會/物理/化學 are not subjects we open.
+  var SUBJECTS = ["數學", "理化", "國文", "英文", "尚未決定"];
 
   function stagesFor(spec) {
     var keys = spec ? spec.split(",") : ["國小", "國中", "高中"];
@@ -32,20 +31,9 @@
     keys.forEach(function (k) { out = out.concat(STAGES[k.trim()] || []); });
     return out.length ? out : STAGES["國中"];
   }
-  function subjectsFor(spec) {
-    var keys = spec ? spec.split(",") : ["國中"];
-    var seen = {}, out = [];
-    keys.forEach(function (k) {
-      (SUBJECTS[k.trim()] || []).forEach(function (s) {
-        if (!seen[s]) { seen[s] = 1; out.push(s); }
-      });
-    });
-    return out.length ? out : SUBJECTS["國中"];
-  }
 
   function build(el) {
     var stages = stagesFor(el.getAttribute("data-stages"));
-    var subjects = subjectsFor(el.getAttribute("data-stages"));
     el.innerHTML =
       '<form class="lf" novalidate>' +
         '<div class="lf-grid">' +
@@ -62,7 +50,7 @@
             '<option>晚間</option><option>皆可</option></select></label>' +
         "</div>" +
         '<fieldset class="lf-subj"><legend>想加強的科目（可複選）</legend>' +
-          subjects.map(function (s) {
+          SUBJECTS.map(function (s) {
             return '<label class="lf-chip"><input type="checkbox" name="subjects" value="' + s + '"><span>' + s + "</span></label>";
           }).join("") +
         "</fieldset>" +
