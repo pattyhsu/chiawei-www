@@ -32,9 +32,10 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 
 ## DNS (Namecheap BasicDNS since 2026-08-11 — deliberately NOT on Cloudflare)
 
-**Canonical host is the APEX: https://chiaweiedu.com** (live 2026-08-11, HTTPS
-enforced). `www` 301-redirects to it — GitHub Pages does that itself because
-the `CNAME` file holds the apex. The zone moved GoDaddy → Namecheap (registrar
+**Canonical host is https://www.chiaweiedu.com.** The apex was tried as canonical
+2026-08-12 and REVERTED 2026-08-13 — see the trap below. `chiaweiedu.com`
+serves over plain HTTP only (GitHub Pages redirects it to www); it has no TLS
+cert, so `https://chiaweiedu.com` fails. The zone moved GoDaddy → Namecheap (registrar
 transfer) 2026-08-11; records live in Namecheap → chiaweiedu.com → Advanced DNS:
 
 - `@` **four A records** → `185.199.108.153` / `.109.153` / `.110.153` / `.111.153`
@@ -56,8 +57,19 @@ apex → `ERR_CERT_COMMON_NAME_INVALID`. Waiting does not fix it (nothing
 re-triggers issuance while a valid cert exists) and repeated remove/re-add of
 the custom domain only restarts the clock.
 
-**The fix that works: put the host you want covered in `CNAME`.** Setting it to
-the apex made the API report `domains: [chiaweiedu.com, www.chiaweiedu.com]`
-within seconds. Diagnose with the handshake, not the API:
-`curl -sv https://chiaweiedu.com/ 2>&1 | grep subject` — if it says
-`CN=*.github.io`, Pages does not have a cert for that name.
+**Putting the host in `CNAME` is necessary but NOT sufficient.** Setting it to the
+apex made the API report `domains: [chiaweiedu.com, www.chiaweiedu.com]` within
+seconds — and then the cert never issued: **16+ hours stuck in `dns_changed`,
+with Certificate Transparency showing Let's Encrypt never issued anything for
+the apex.** DNS was provably perfect throughout (4 A records, no AAAA/CAA/DNSSEC).
+This is a **known GitHub backend failure** (community discussions #200447,
+#184514 — one apex stuck 3 weeks); the only remedy is a GitHub Support ticket
+asking them to re-trigger issuance. **Do NOT remove/re-add the custom domain to
+"nudge" it — that resets their internal timer and prolongs it.** (We did, three
+times, and it did not help.) Reverting `CNAME` to www restores HTTPS in ~2 min
+because the www cert is still valid.
+
+Diagnose with the handshake and CT logs, not the API:
+`curl -sv https://<host>/ 2>&1 | grep subject` — if it says `CN=*.github.io`,
+Pages has no cert for that name. Then check whether one was ever issued:
+`curl -s "https://api.certspotter.com/v1/issuances?domain=chiaweiedu.com&include_subdomains=true&expand=dns_names"`.
