@@ -30,46 +30,53 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 3. 同意文 (`legal/privacy-v1.html`) needs owner sign-off before the first real
    parent binds.
 
-## DNS (Namecheap BasicDNS since 2026-08-11 — deliberately NOT on Cloudflare)
+## DNS — Cloudflare since 2026-08-13 (reversal; read the why)
 
-**Canonical host is https://www.chiaweiedu.com.** The apex was tried as canonical
-2026-08-12 and REVERTED 2026-08-13 — see the trap below. `chiaweiedu.com`
-serves over plain HTTP only (GitHub Pages redirects it to www); it has no TLS
-cert, so `https://chiaweiedu.com` fails. The zone moved GoDaddy → Namecheap (registrar
-transfer) 2026-08-11; records live in Namecheap → chiaweiedu.com → Advanced DNS:
+**Both hosts work over HTTPS.** `https://chiaweiedu.com` and
+`https://www.chiaweiedu.com` both serve; the apex 301s to www (canonical).
+Cert is Cloudflare's Universal SSL (Google Trust Services), covering both names.
 
-- `@` **four A records** → `185.199.108.153` / `.109.153` / `.110.153` / `.111.153`
-  (GitHub Pages). NOT a URL Redirect record — Namecheap's redirect service
-  answers plain HTTP only, so `https://chiaweiedu.com` timed out under it.
-- `www` CNAME → `pattyhsu.github.io` (this site)
-- `admin` CNAME → `pattyhsu.github.io` (chiawei-admin)
-- MAIL SETTINGS → Gmail preset (the school's Google Workspace MX — do NOT
-  remove; without it school email silently queues then bounces)
+Registrar = Namecheap; **DNS is now Cloudflare** (`chuck`/`jade.ns.cloudflare.com`).
+Records live in the Cloudflare dashboard:
 
-### ⚠️ The cert-scoping trap (cost a day, 2026-08-11→12)
+| Record | Value | Proxy |
+|---|---|---|
+| `@` A ×4 | `185.199.108–111.153` (GitHub Pages) | 🟠 Proxied — this is what gets the apex a cert |
+| `www` CNAME | `pattyhsu.github.io` | 🟠 Proxied |
+| `admin` CNAME | `pattyhsu.github.io` | ⚪ DNS-only (already had a valid GitHub cert; keeps blast radius small) |
+| MX ×5 | Google Workspace (`aspmx.l`, `alt1`, `alt2`, `aspmx2`, `aspmx3`) | ⚪ DNS-only — **never proxy MX; this is school email** |
 
-**GitHub Pages scopes the TLS cert to whatever `CNAME` held when it provisioned,
-and never widens it on its own.** The first cert was issued while `CNAME` said
-`www.chiaweiedu.com` and the apex still pointed at Namecheap's redirect IP, so
-it named `www` only. After the apex A records were fixed, GitHub kept serving
-that still-valid cert and fell back to its generic `*.github.io` cert for the
-apex → `ERR_CERT_COMMON_NAME_INVALID`. Waiting does not fix it (nothing
-re-triggers issuance while a valid cert exists) and repeated remove/re-add of
-the custom domain only restarts the clock.
+**SSL/TLS mode MUST stay "Full"** — not "Full (strict)" (GitHub has no cert for
+the apex, so strict fails), not "Flexible" (redirect loop with GitHub Pages).
+"Always Use HTTPS" is on; **HSTS is deliberately OFF** (it is a one-way door and
+already caused a day of "can't even load http" during the outage below).
 
-**Putting the host in `CNAME` is necessary but NOT sufficient.** Setting it to the
-apex made the API report `domains: [chiaweiedu.com, www.chiaweiedu.com]` within
-seconds — and then the cert never issued: **16+ hours stuck in `dns_changed`,
-with Certificate Transparency showing Let's Encrypt never issued anything for
-the apex.** DNS was provably perfect throughout (4 A records, no AAAA/CAA/DNSSEC).
-This is a **known GitHub backend failure** (community discussions #200447,
-#184514 — one apex stuck 3 weeks); the only remedy is a GitHub Support ticket
-asking them to re-trigger issuance. **Do NOT remove/re-add the custom domain to
-"nudge" it — that resets their internal timer and prolongs it.** (We did, three
-times, and it did not help.) Reverting `CNAME` to www restores HTTPS in ~2 min
-because the www cert is still valid.
+Cloudflare caches static assets: after pushing site changes, if you don't see
+them, **Caching → Configuration → Purge Everything** (or Development Mode).
 
-Diagnose with the handshake and CT logs, not the API:
-`curl -sv https://<host>/ 2>&1 | grep subject` — if it says `CN=*.github.io`,
-Pages has no cert for that name. Then check whether one was ever issued:
-`curl -s "https://api.certspotter.com/v1/issuances?domain=chiaweiedu.com&include_subdomains=true&expand=dns_names"`.
+### Why we moved (this reverses a recorded decision)
+
+The domain was deliberately kept OFF Cloudflare (PRD §11 F-1) because it carries
+the school's Google Workspace MX and the move was judged "risk for zero gain".
+The gain stopped being zero:
+
+**GitHub Pages could not give the apex a certificate.** GitHub scopes the cert to
+whatever `CNAME` held at provisioning and never widens it, so the first cert named
+`www` only. Putting the apex in `CNAME` made the API list both names — and then
+nothing issued for **16+ hours**, with Certificate Transparency confirming Let's
+Encrypt issued *nothing* for the apex, while DNS was provably perfect (4 A records,
+no AAAA/CAA/DNSSEC). That is a **known GitHub backend failure** (community
+discussions #200447, #184514 — one apex stuck 3 weeks) whose only remedy is a
+support ticket. Meanwhile a parent typing `chiaweiedu.com` got a browser security
+warning — the actual business cost that flipped the decision (Patty, 2026-08-13).
+
+**Two traps learned the hard way, do not repeat:**
+1. **Never remove/re-add the GitHub custom domain to "nudge" provisioning** — it
+   resets GitHub's internal timer. We did it three times; it prolonged the outage.
+2. **Diagnose at the handshake and in CT logs, not the Pages API.** The API happily
+   reported both domains "approved" while the edge served `CN=*.github.io`:
+   - `curl -sv https://<host>/ 2>&1 | grep subject` → `CN=*.github.io` means no cert
+   - `curl -s "https://api.certspotter.com/v1/issuances?domain=chiaweiedu.com&include_subdomains=true&expand=dns_names"` → was one ever issued?
+
+If Cloudflare is ever removed, the apex loses HTTPS again until GitHub fixes the
+backend — do not undo this without re-reading the above.
