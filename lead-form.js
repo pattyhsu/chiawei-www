@@ -15,25 +15,44 @@
   var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuZ2Rkdnhyb2lva3FtcHhkd3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjYzMzgsImV4cCI6MjA5Njc0MjMzOH0.x5PQWx-V8gyJvcsNMSFoJYjRWCXgt1fcUAfkhCjlVE0";
 
   // Must stay a subset of the DB CHECK vocabularies (leads_stage_ck / leads_subjects_ck).
+  //
+  // Rendered as <optgroup> so 國小/國中/高中 are headings and the 年級 sit
+  // indented under them (Patty's call, 2026-08-13). The label is what the
+  // parent reads; the value is what the DB CHECK accepts — 國小 shows a bare
+  // 三年級 because the group heading already says 國小, but still posts
+  // 國小三年級. Don't collapse label into value.
   var STAGES = {
-    "國小": ["國小三年級", "國小四年級", "國小五年級", "國小六年級"],
-    "國中": ["國一", "國二", "國三"],
-    "高中": ["高一", "高二", "高三"],
+    "國小": [
+      ["國小一年級", "一年級"], ["國小二年級", "二年級"], ["國小三年級", "三年級"],
+      ["國小四年級", "四年級"], ["國小五年級", "五年級"], ["國小六年級", "六年級"],
+    ],
+    "國中": [["國一", "國一"], ["國二", "國二"], ["國三", "國三"]],
+    "高中": [["高一", "高一"], ["高二", "高二"], ["高三", "高三"]],
   };
   // One list for every 學階 (Patty's call, 2026-08-13): these four are what the
   // school actually teaches, so 國小/國中/高中 all show the same chips. Do NOT
   // re-split this per stage — 國語/英語/社會/物理/化學 are not subjects we open.
   var SUBJECTS = ["數學", "理化", "國文", "英文", "尚未決定"];
 
-  function stagesFor(spec) {
-    var keys = spec ? spec.split(",") : ["國小", "國中", "高中"];
-    var out = [];
-    keys.forEach(function (k) { out = out.concat(STAGES[k.trim()] || []); });
-    return out.length ? out : STAGES["國中"];
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  }
+  // → the <optgroup>…</optgroup> markup for the 孩子年級 select, in ladder order.
+  function stageOptions(spec) {
+    var keys = (spec ? spec.split(",") : ["國小", "國中", "高中"])
+      .map(function (k) { return k.trim(); })
+      .filter(function (k) { return STAGES[k]; });
+    if (!keys.length) keys = ["國中"];
+    return keys.map(function (k) {
+      return '<optgroup label="' + esc(k) + '">' +
+        STAGES[k].map(function (o) {
+          return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + "</option>";
+        }).join("") +
+        "</optgroup>";
+    }).join("");
   }
 
   function build(el) {
-    var stages = stagesFor(el.getAttribute("data-stages"));
     el.innerHTML =
       '<form class="lf" novalidate>' +
         '<div class="lf-grid">' +
@@ -43,7 +62,7 @@
             '<input name="phone" type="tel" inputmode="tel" maxlength="20" required placeholder="09xx-xxx-xxx"></label>' +
           '<label class="lf-f"><span>孩子年級 <i>*</i></span><select name="stage" required>' +
             '<option value="">請選擇</option>' +
-            stages.map(function (s) { return '<option>' + s + "</option>"; }).join("") +
+            stageOptions(el.getAttribute("data-stages")) +
             '<option>其他</option></select></label>' +
           '<label class="lf-f"><span>方便聯絡時段</span><select name="contact_window">' +
             '<option value="">不限</option><option>上午</option><option>下午</option>' +
