@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /parent/
 
 Sitemap: https://www.chiaweiedu.com/sitemap.xml

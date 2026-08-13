@@ -10,17 +10,21 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 | `index.html` | 官網首頁 (brand v4 版型 + live 開課資訊) |
 | `elementary/junior/senior.html` | 年段頁 (國小/國中/高中) |
 | `offerings.js` | renders 開課資訊 from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com) |
-| `parent/index.html` | **家長專區** — LIFF/LINE Login → parent-login Edge Function → RLS-scoped child report |
-| `legal/privacy-v1.html` | 個資法 告知/同意文 (versioned; new version = NEW file, bump `CONSENT_VERSION`) |
-| `robots.txt` / `sitemap.xml` | 官網 indexable; `/parent/` noindex |
+| `legal/privacy-v1.html` | 個資法 告知/同意文 (versioned; new version = NEW file) |
+| `robots.txt` / `sitemap.xml` | 官網 indexable |
 
-## Config points
-
-- `parent/index.html` → `LIFF_ID` is **empty** until the LINE Login channel +
-  LIFF app exist (LINE Developers console, **same provider as the school OA** —
-  otherwise the captured userId will never match the push userId). Until then
-  the page shows 尚未開通.
-- The Edge Function needs `supabase secrets set LINE_LOGIN_CHANNEL_ID=…`.
+> **家長專區 REMOVED from the site 2026-08-13** (Patty: "we'll build this later if
+> needed"). `parent/index.html` was deleted — recover with
+> `git show 73bc363:parent/index.html`. The **backend is intact and inert**: the
+> `parent-login` Edge Function is deployed but returns 503 (no LINE secret), and
+> the DB half (`parents.line_user_id`, `parent_link_codes`, `parent_consents`,
+> `parent_bind()`, `taxonomy_labels_v`, pgTAP 15/16) is untouched — migrations are
+> append-only, and none of it is reachable without the page. To revive: restore the
+> file, re-add the nav/footer links, set `LIFF_ID`, and put back the 產生家長綁定碼
+> button in `chiawei-admin/roster.html` (also removed).
+> ⚠️ `legal/privacy-v1.html` is still linked in the footer but its text describes
+> the 家長專區 specifically — it does **not** cover the 預約表單's collection of
+> parent name/phone/child grade. Rewrite it as a general 告知 before relying on it.
 
 ## 上線前 (content pour — owner)
 
