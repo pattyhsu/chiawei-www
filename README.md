@@ -26,11 +26,22 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 > the 家長專區 specifically — it does **not** cover the 預約表單's collection of
 > parent name/phone/child grade. Rewrite it as a general 告知 before relying on it.
 
-## 上線前 (content pour — owner)
+## Content pour (owner) — 示意 badges removed 2026-08-13
 
-1. Replace every 「示意資料」 block (榜單/躍升/師資/地址電話/LINE id/費用 FAQ)
-   with real data — 榜單/見證 require 家長書面同意; then remove the badges.
-2. GA4 measurement id (not added yet — add the snippet to all four pages).
+The 「示意資料 / 數字示意，待填」 badges and the `.demo-badge` style are **gone**
+(Patty's call: "we launched, I'll change the info in it slowly afterwards").
+Nothing on the site now signals which content is still placeholder, so the list
+below is the only record of what still needs real data:
+
+1. **升學成果** — hero 成果卡, the 「00 位／00 年」 stat row, 榜單牆 (王○宇…), and the
+   段考躍升 chips are all invented and currently read as fact. 榜單/見證 require
+   家長書面同意 before publishing the real ones.
+2. **見證與師資** — 國小部「家長怎麼說」, 高中部「學長姊怎麼說」, and the ○○老師 cards.
+3. **每週報告 mock-ups** (index 家長每週收到的報告, junior 逐觀念精熟報告) — these are
+   UI examples rather than claims, so they can stay as-is.
+4. **Seasonal banner** (`#summer` on index) — swapped to 新學期 on 2026-08-13 and
+   left date-free; it needs the real 開課日 whenever the 檔期 is fixed.
+5. GA4 measurement id (not added yet — add the snippet to all four pages).
 3. 同意文 (`legal/privacy-v1.html`) needs owner sign-off before the first real
    parent binds.
 
