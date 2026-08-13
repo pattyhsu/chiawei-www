@@ -252,14 +252,13 @@
   .voice p{font-family:var(--serif);margin-top:8px;font-size:1rem;line-height:1.85;color:#22305F}
 
   /* ===== teachers ===== */
-  /* .teachers/.tch — UNUSED since the 師資 section was removed 2026-08-13 (see the
-     comment where that section was). Kept because a real 師資 grid may return once
-     there are real teachers to name; delete these 7 rules if the story section
-     lands instead and the grid is not coming back. */
+  /* 師資 cards. Photos are real staff headshots (photos/teacher1–3.jpg) — the
+     avatar carries a ring because the shots are on white and the card is white,
+     so without it the circle disappears. */
   .teachers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
   @media(max-width:760px){.teachers{grid-template-columns:1fr}}
   .tch{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center}
-  .tch .avatar{width:84px;height:84px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#fff}
+  .tch .avatar{width:132px;height:132px;border-radius:50%;margin:0 auto 14px;display:block;object-fit:cover;border:3px solid var(--blue-tint);background:var(--blue-tint)}
   .tch h3{font-size:1.08rem;font-weight:800}
   .tch .sub2{font-size:.8rem;color:var(--blue);font-weight:700;margin-top:2px}
   .tch p{font-size:.88rem;color:var(--slate);margin-top:8px}
@@ -552,22 +551,36 @@
   </div>
 </section>
 
-<!-- ===== 師資 — REMOVED 2026-08-13 (Patty) =====
-     Two of the three cards were INVENTED (○○老師 / 理化 15 年 / 英語 12 年 came
-     from the brand template, not from real teachers) and were live with no 示意
-     badge. The heading also overstated: it read 創辦人仍親自帶班, but the founder
-     teaches one class now.
-
-     Deliberately NOT replaced with a corrected 師資 grid — naming real teachers
-     is a bigger commitment (credentials, photos, their consent). The intended
-     replacement is a **三十年 story section** (the 支柱 that makes 我們的方法
-     believable, and the thing a chain can't copy); it is waiting on real
-     material from Patty, because inventing an origin story would repeat the
-     exact mistake this removal fixes.
-
-     Worth keeping when that section is written — Patty confirmed this line true:
-       「三十年只做一件事：把每一種題型教到孩子從根本弄懂。」
-     Full markup: git show 8d343ca:index.html -->
+<!-- ===== 師資 =====
+     REAL staff, supplied by Patty 2026-08-13 (names, subjects and photo order all
+     hers). The earlier version of this section had INVENTED teachers (○○老師 /
+     理化 15 年 / 英語 12 年, straight from the brand template) — do not re-add
+     年資 or a bio line to any card unless Patty supplies it. -->
+<section id="teachers" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">師資 · Teachers</div>
+      <h2>帶班的老師</h2>
+    </div>
+    <div class="teachers">
+      <div class="tch">
+        <img class="avatar" src="photos/teacher1.jpg" alt="徐子老師" width="132" height="132" loading="lazy">
+        <h3>徐子老師</h3>
+        <div class="sub2">理化</div>
+      </div>
+      <div class="tch">
+        <img class="avatar" src="photos/teacher2.jpg" alt="旻軒老師" width="132" height="132" loading="lazy">
+        <h3>旻軒老師</h3>
+        <div class="sub2">數學</div>
+      </div>
+      <div class="tch">
+        <img class="avatar" src="photos/teacher3.jpg" alt="昇哥老師" width="132" height="132" loading="lazy">
+        <h3>昇哥老師</h3>
+        <div class="sub2">數學</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- 校區資訊 lives in the site-wide footer (#campuses) — not a section of its own. -->
 
