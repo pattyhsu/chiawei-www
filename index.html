@@ -248,6 +248,16 @@
   /* .roll ul sets flex-column, so this needs the same specificity to win */
   .roll ul.rollgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
   @media(max-width:760px){.roll ul.rollgrid{grid-template-columns:1fr}}
+  /* 榜單牆 — photographs of the real posters. Cards sit on the dark band, so the
+     frame is a light translucent panel; images keep their own aspect ratio
+     (posters are a mix of portrait/landscape) rather than being cropped square,
+     because cropping a 榜單 can cut a child's name out of frame. */
+  .rollwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .rollwall figure{margin:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .rollwall img{width:100%;height:auto;display:block;border-radius:9px;background:#fff}
+  .rollwall figcaption{font-size:.82rem;color:#C6D2FF;font-weight:700;text-align:center;padding-bottom:2px}
+  .rollnote{margin-top:14px;font-size:.84rem;color:#8FA0D8}
   .leaps-lbl{font-size:.85rem;color:#C6D2FF;margin-bottom:10px}
   .leaps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   @media(max-width:760px){.leaps-row{grid-template-columns:1fr}}
@@ -440,19 +450,18 @@
     </div>
     <div class="hero-visual">
     <div class="photocard"><img src="photos/hero-index.jpg" alt="家偉教室實況"></div>
+    <!-- These three are READ OFF the real 115 榜單 posters (photos/roll/roll-115a,
+         roll-115b) — they replaced three INVENTED students that were live here.
+         If you change a name or a score, check it against the poster image first;
+         the 榜單牆 in #results is the source of truth for this card. -->
     <div class="heroproof">
-      <div class="hp-t"><span>今年的成果</span></div>
+      <div class="hp-t"><span>115 會考 · 部分榜單</span></div>
       <ul>
-        <li>王○宇　新竹高中 <b class="num">5A++</b></li>
-        <li>李○蓁　新竹女中 <b class="num">5A+</b></li>
-        <li>張○睿　實驗中學 <b class="num">5A</b></li>
+        <li>許○綺 <b class="num">5A10+</b></li>
+        <li>范○晴 <b class="num">5A9+</b></li>
+        <li>陳○蓁 <b class="num">5A8+</b></li>
       </ul>
-      <div class="hp-leap">
-        <span class="hp-lbl">進步幅度 · 校內數學段考</span>
-        <span class="w">國三陳同學 · 一學期</span>
-        <span class="f num">58</span><span class="a">→</span><span class="t num">86</span><span class="d num">+28</span>
-      </div>
-      <p class="hp-cap">每一分成果，我們都說得出是怎麼來的 ↓</p>
+      <p class="hp-cap">完整榜單在下面，每一分成果我們都說得出是怎麼來的 ↓</p>
     </div>
     </div>
   </div>
@@ -467,32 +476,38 @@
       <p class="sub">名單比形容詞有用。這裡放的是真的考上的孩子——而且每一個名字，我們都說得出他是怎麼考上的。</p>
     </div>
 
-    <!-- 數字帶 -->
+    <!-- 數字帶 — 30年 is used site-wide; the 5A count is quoted verbatim from the
+         班 own 2024 榜單 poster (photos/roll/roll-113-5a.jpg). Do not round it up
+         or restate it as a different metric. -->
     <div class="statrow">
-      <div class="stat"><b class="num">00</b><span>位　進入<b>前三志願</b></span></div>
-      <div class="stat"><b class="num">00</b><span>年　累積榜單</span></div>
+      <div class="stat"><b class="num">30</b><span>年　在地累積榜單</span></div>
+      <div class="stat"><b>5A 超過 <span class="num">30</span> 人</b><span>113 會考（2024）</span></div>
     </div>
 
-    <div class="roll roll-wide">
-      <div class="rt"><span>榜單牆 · Roll of honor</span></div>
-      <ul class="rollgrid">
-        <li>王○宇　新竹高中 <b>5A++</b></li>
-        <li>李○蓁　新竹女中 <b>5A+</b></li>
-        <li>張○睿　實驗中學 <b>5A</b></li>
-        <li>陳○安　竹科實中 <b>5A</b></li>
-        <li>林○妤　苗栗高中 <b>5A</b></li>
-        <li>黃○翔　竹南高中 <b>4A1B</b></li>
-        <li>吳○庭　苗栗高中 <b>4A1B</b></li>
-        <li>劉○宏　竹南高中 <b>4A1B</b></li>
-      </ul>
+    <!-- 榜單牆 — REAL posters photographed at the 校區, supplied by Patty 2026-08-13.
+         These replaced eight INVENTED students (王○宇 新竹高中 5A++ …) that had been
+         live with no 示意 badge. Rules: names stay masked exactly as the posters
+         print them (○/★); never transcribe a poster into HTML text, because a
+         typo then becomes a false claim about a real child. The image IS the claim. -->
+    <div class="rollwall">
+      <figure><img src="photos/roll/roll-115a.jpg" alt="115 會考榜單" loading="lazy">
+        <figcaption>115 會考 · 榜單</figcaption></figure>
+      <figure><img src="photos/roll/roll-115b.jpg" alt="115 會考榜單" loading="lazy">
+        <figcaption>115 會考 · 榜單</figcaption></figure>
+      <!-- this one's storefront carries a 學測 poster (台大電機) alongside the
+           會考 ones, so the caption stays the broader 榜單 -->
+      <figure><img src="photos/roll/roll-114.jpg" alt="114 榜單，校區門口" loading="lazy">
+        <figcaption>114 榜單 · 校區門口</figcaption></figure>
+      <figure><img src="photos/roll/roll-113.jpg" alt="113 會考榜單，校區門口" loading="lazy">
+        <figcaption>113 會考 · 校區門口</figcaption></figure>
+      <figure><img src="photos/roll/roll-113-5a.jpg" alt="113 會考 5A 榜單" loading="lazy">
+        <figcaption>113 會考 · 5A 榜</figcaption></figure>
+      <figure><img src="photos/roll/roll-senior-univ.jpg" alt="高中部大學錄取榜單" loading="lazy">
+        <figcaption>高中部 · 大學錄取</figcaption></figure>
+      <figure><img src="photos/roll/roll-elem-private.jpg" alt="國小部私校錄取榜單" loading="lazy">
+        <figcaption>國小部 · 私校錄取</figcaption></figure>
     </div>
-
-    <p class="leaps-lbl">校內段考成績，一學期內的變化</p>
-    <div class="leaps leaps-row">
-      <div class="leapchip"><span class="w">國三 · 陳同學</span><span class="f num">58</span><span class="a">→</span><span class="t num">86</span><span class="d num">+28</span></div>
-      <div class="leapchip"><span class="w">國三 · 林同學</span><span class="f num">71</span><span class="a">→</span><span class="t num">94</span><span class="d num">+23</span></div>
-      <div class="leapchip"><span class="w">國二 · 張同學</span><span class="f num">49</span><span class="a">→</span><span class="t num">78</span><span class="d num">+29</span></div>
-    </div>
+    <p class="rollnote">榜單皆為校區實際張貼之公告，姓名依慣例遮字。</p>
   </div>
 </section>
 
@@ -560,7 +575,10 @@
     </div>
     <div class="prog">
       <div class="heat">
-        <div class="t"><span>家長每週收到的報告長這樣</span></div>
+        <!-- Illustrative: this shows the SHAPE of the report, not one child's real
+             marks. The 範例 marker is load-bearing — without it these read as a
+             real student's scores. -->
+        <div class="t"><span>家長每週收到的報告長這樣</span><span class="demo-badge">範例</span></div>
         <div class="hrow"><span class="rl">一元二次方程式</span><div class="hc" style="background:#EF5226"><span class="num">42</span></div><div class="hc" style="background:#D9A400"><span class="num">61</span></div><div class="hc" style="background:#D9A400"><span class="num">67</span></div><div class="hc" style="background:#5B85DC"><span class="num">74</span></div><div class="hc" style="background:#2547C7"><span class="num">88</span></div></div>
         <div class="hrow"><span class="rl">二次函數圖形</span><div class="hc" style="background:#D9A400"><span class="num">58</span></div><div class="hc" style="background:#D9A400"><span class="num">63</span></div><div class="hc" style="background:#5B85DC"><span class="num">75</span></div><div class="hc" style="background:#2547C7"><span class="num">86</span></div><div class="hc" style="background:#2547C7"><span class="num">92</span></div></div>
         <div class="hrow"><span class="rl">相似形</span><div class="hc" style="background:#EF5226"><span class="num">38</span></div><div class="hc" style="background:#D9A400"><span class="num">55</span></div><div class="hc" style="background:#5B85DC"><span class="num">71</span></div><div class="hc" style="background:#5B85DC"><span class="num">78</span></div><div class="hc" style="background:#2547C7"><span class="num">90</span></div></div>
