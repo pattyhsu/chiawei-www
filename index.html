@@ -90,7 +90,31 @@
   .btn-cta.small{font-size:1.02rem;padding:7px 16px}
   .btn-ghost{border:2px solid var(--blue);color:var(--blue);font-size:1.02rem;padding:11px 24px;background:#fff}
   .btn-ghost:hover{background:var(--blue-tint)}
-  @media(max-width:900px){.nav-links{display:none}}
+  /* ===== mobile nav =====
+     ≤900px the desktop links are hidden. Before 2026-08-13 nothing replaced
+     them, so a phone visitor had NO way to reach 國小/國中/高中, 升學成果, FAQ or
+     校區 — only the CTA. The hamburger below is that replacement; the 班別課程
+     submenu flattens inline rather than needing a second tap. */
+  .navtoggle{display:none;margin-left:auto;background:none;border:1.5px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer;line-height:0}
+  .navtoggle:hover{border-color:var(--blue)}
+  .navtoggle span{display:block;width:19px;height:2px;background:var(--ink);border-radius:2px}
+  .navtoggle span + span{margin-top:4px}
+  @media(max-width:900px){
+    .navtoggle{display:block}
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;margin:0;
+               background:var(--card);border-bottom:1px solid var(--line);
+               flex-direction:column;gap:0;padding:4px 0 8px;
+               box-shadow:0 20px 34px -24px rgba(15,28,77,.45)}
+    .nav-links.open{display:flex}
+    .nav-links > a,.navdrop > a{display:block;padding:11px clamp(14px,2.6vw,24px)}
+    .navdrop{position:static}
+    .navdrop > a::after{display:none}
+    .navdrop-menu{position:static;transform:none;display:flex;min-width:0;
+                  margin:0;padding:0 0 4px 14px;border:0;box-shadow:none;background:none}
+    .navdrop-menu a{padding:9px clamp(14px,2.6vw,24px)}
+    /* the header CTA duplicates the sticky bottom bar on phones */
+    .nav-in > .btn-cta{display:none}
+  }
 
   /* ===== hero (conversion-first, slim) ===== */
   /* 第一屏用白底，和下方灰底的內容區分開 */
@@ -368,7 +392,11 @@
       <img src="ant-logo.svg" alt="家偉螞蟻吉祥物" onerror="this.style.display='none'">
       <span>家偉文理補習班<span class="en">CHIAWEI</span></span>
     </a>
-    <div class="nav-links">
+    <button class="navtoggle" id="navtoggle" type="button"
+            aria-label="開啟選單" aria-expanded="false" aria-controls="nav-links">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="nav-links">
       <div class="navdrop">
         <a href="#classes">班別課程</a>
         <div class="navdrop-menu">
@@ -702,6 +730,29 @@
       if(t){t.classList.add('cls-focus');setTimeout(function(){t.classList.remove('cls-focus')},2200)}
     });
   });
+
+  /* mobile nav (≤900px). Closes on: link tap, outside click, Esc — a panel you
+     can't dismiss is worse than no panel on a phone. */
+  var tog=document.getElementById('navtoggle'), panel=document.getElementById('nav-links');
+  if(tog&&panel){
+    var setOpen=function(open){
+      panel.classList.toggle('open',open);
+      tog.setAttribute('aria-expanded',open?'true':'false');
+      tog.setAttribute('aria-label',open?'關閉選單':'開啟選單');
+    };
+    tog.addEventListener('click',function(e){
+      e.stopPropagation();
+      setOpen(!panel.classList.contains('open'));
+    });
+    panel.addEventListener('click',function(e){ if(e.target.closest('a')) setOpen(false); });
+    document.addEventListener('click',function(e){
+      if(panel.classList.contains('open')&&!panel.contains(e.target)&&e.target!==tog) setOpen(false);
+    });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') setOpen(false); });
+    /* if the viewport grows back to desktop, drop the open state so the panel
+       doesn't linger as a stray column */
+    window.addEventListener('resize',function(){ if(window.innerWidth>900) setOpen(false); });
+  }
 })();
 </script>
 <script src="lead-form.js" defer></script>
