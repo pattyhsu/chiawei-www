@@ -252,11 +252,29 @@
      frame is a light translucent panel; images keep their own aspect ratio
      (posters are a mix of portrait/landscape) rather than being cropped square,
      because cropping a 榜單 can cut a child's name out of frame. */
-  .rollwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-  .rollwall figure{margin:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-    border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
-  .rollwall img{width:100%;height:auto;display:block;border-radius:9px;background:#fff}
-  .rollwall figcaption{font-size:.82rem;color:#C6D2FF;font-weight:700;text-align:center;padding-bottom:2px}
+  /* 榜單 — the poster photo is the evidence; the transcription is what a parent
+     (and a search engine) can actually read. Names keep the poster's own masking. */
+  .rollsets{display:flex;flex-direction:column;gap:14px}
+  .rollset{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;padding:16px}
+  @media(max-width:700px){.rollset{grid-template-columns:1fr}}
+  .rollset figure{margin:0;display:flex;flex-direction:column;gap:8px}
+  .rollset img{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
+  .rollset figcaption{font-size:.8rem;color:#C6D2FF;font-weight:800;text-align:center}
+  .rollset .names{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 16px}
+  .rollset .names.univ{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  .rollset .names li{font-size:.92rem;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.12);
+    display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .rollset .names li b{color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:auto}
+  .rollset .names.univ li b{margin-left:0;color:#fff}
+  .rollset .names li small{width:100%;font-size:.74rem;color:#9DB2FF}
+  .rollset .names li.wide{grid-column:1/-1;border-bottom:0;padding-top:10px;
+    font-size:.84rem;color:#C6D2FF;font-weight:700}
+  .rollset .names li.wide b{margin-left:0;color:#fff}
+  .setnote{grid-column:2/-1;margin-top:6px;font-size:.78rem;color:#8FA0D8}
+  @media(max-width:700px){.setnote{grid-column:1/-1}}
   .rollnote{margin-top:14px;font-size:.84rem;color:#8FA0D8}
   .leaps-lbl{font-size:.85rem;color:#C6D2FF;margin-bottom:10px}
   .leaps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -484,30 +502,119 @@
       <div class="stat"><b>5A 超過 <span class="num">30</span> 人</b><span>113 會考（2024）</span></div>
     </div>
 
-    <!-- 榜單牆 — REAL posters photographed at the 校區, supplied by Patty 2026-08-13.
-         These replaced eight INVENTED students (王○宇 新竹高中 5A++ …) that had been
-         live with no 示意 badge. Rules: names stay masked exactly as the posters
-         print them (○/★); never transcribe a poster into HTML text, because a
-         typo then becomes a false claim about a real child. The image IS the claim. -->
-    <div class="rollwall">
-      <figure><img src="photos/roll/roll-115a.jpg" alt="115 會考榜單" loading="lazy">
-        <figcaption>115 會考 · 榜單</figcaption></figure>
-      <figure><img src="photos/roll/roll-115b.jpg" alt="115 會考榜單" loading="lazy">
-        <figcaption>115 會考 · 榜單</figcaption></figure>
-      <!-- this one's storefront carries a 學測 poster (台大電機) alongside the
-           會考 ones, so the caption stays the broader 榜單 -->
-      <figure><img src="photos/roll/roll-114.jpg" alt="114 榜單，校區門口" loading="lazy">
-        <figcaption>114 榜單 · 校區門口</figcaption></figure>
-      <figure><img src="photos/roll/roll-113.jpg" alt="113 會考榜單，校區門口" loading="lazy">
-        <figcaption>113 會考 · 校區門口</figcaption></figure>
-      <figure><img src="photos/roll/roll-113-5a.jpg" alt="113 會考 5A 榜單" loading="lazy">
-        <figcaption>113 會考 · 5A 榜</figcaption></figure>
-      <figure><img src="photos/roll/roll-senior-univ.jpg" alt="高中部大學錄取榜單" loading="lazy">
-        <figcaption>高中部 · 大學錄取</figcaption></figure>
-      <figure><img src="photos/roll/roll-elem-private.jpg" alt="國小部私校錄取榜單" loading="lazy">
-        <figcaption>國小部 · 私校錄取</figcaption></figure>
+    <!-- 榜單牆 — REAL posters photographed at the 校區 (Patty, 2026-08-13), with the
+         names TRANSCRIBED from each image at full resolution (Patty asked for text;
+         she double-checks the readings). Two rules learned the hard way:
+           * The YEAR label must come from what the POSTER says, not the filename —
+             a first pass mis-mapped files and would have captioned the university
+             list as a 會考 board. Only the 2024 board and the 私校 board actually
+             state a year; the rest are labelled by content until Patty confirms.
+           * Names keep the poster's own masking (○ / ★). Never un-mask, never
+             "tidy" a character you cannot read — flag it instead. -->
+    <div class="rollsets">
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-115a.jpg" alt="會考榜單" loading="lazy">
+          <figcaption>會考 · 5A／4A 榜</figcaption></figure>
+        <ul class="names">
+          <li>陳○蓁 <b>5A8+</b></li><li>范○晴 <b>5A9+</b></li>
+          <li>龔○翔 <b>5A</b></li><li>李○叡 <b>5A</b></li><li>劉○恩 <b>5A</b></li><li>曾○豪 <b>5A</b></li>
+          <li>陳○彰 <b>5A</b></li><li>李○恆 <b>5A</b></li>
+          <li>徐○聖 <b>4A</b></li><li>陳○元 <b>4A</b></li><li>張○君 <b>4A</b></li><li>許○羽 <b>4A</b></li>
+          <li>黃○瑜 <b>4A</b></li><li>施○妤 <b>4A</b></li>
+        </ul>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-115b.jpg" alt="會考榜單" loading="lazy">
+          <figcaption>會考 · 5A／4A 榜</figcaption></figure>
+        <ul class="names">
+          <li>許○綺 <b>5A10+</b></li><li>彭○妍 <b>5A8+</b></li>
+          <li>葉○澤 <b>5A</b></li><li>李○盈 <b>5A</b></li><li>楊○宇 <b>5A</b></li><li>陳○翔 <b>5A</b></li>
+          <li>鍾○恩 <b>5A</b></li><li>劉○萱 <b>5A</b></li>
+          <li>陳○至 <b>4A</b></li><li>鍾○珮 <b>4A</b></li><li>劉○宥 <b>4A</b></li><li>周○民 <b>4A</b></li>
+          <li>吳○霈 <b>4A</b></li><li>曾○晴 <b>4A</b></li>
+        </ul>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-113-5a.jpg" alt="2024 會考榜單，5A 人數超過 30 人" loading="lazy">
+          <figcaption>2024 會考 · 5A 超過 30 人</figcaption></figure>
+        <ul class="names">
+          <li>何○宏 <b>5A10+</b></li><li>李○城 <b>5A10+</b></li><li>郭○旻 <b>5A10+</b></li>
+          <li>羅○暐 <b>5A9+</b></li><li>羅○琁 <b>5A9+</b></li>
+          <li>劉○軒 <b>5A8+</b></li><li>蔡○筑 <b>5A8+</b></li><li>賴○宸 <b>5A8+</b></li><li>臧○廷 <b>5A8+</b></li>
+          <li>徐○恆 <b>5A8+</b></li><li>張○程 <b>5A8+</b></li><li>楊○融 <b>5A8+</b></li><li>蔡○崴 <b>5A8+</b></li>
+          <li>楊○頡 <b>5A7+</b></li><li>施○筑 <b>5A7+</b></li><li>陳○諺 <b>5A7+</b></li><li>黎○誠 <b>5A7+</b></li>
+          <li>賴○諺 <b>5A6+</b></li><li>賴○安 <b>5A6+</b></li><li>陳○濬 <b>5A5+</b></li>
+          <li>任○銘 <b>5A4+</b></li><li>姚○芸 <b>5A4+</b></li><li>陳○昀 <b>5A4+</b></li>
+          <li>王○瑄 <b>5A3+</b></li><li>張○鈞 <b>5A3+</b></li><li>林○樂 <b>5A3+</b></li><li>曾○銘 <b>5A3+</b></li>
+          <li>張○依 <b>5A3+</b></li><li>陳○ <b>5A2+</b></li>
+        </ul>
+        <p class="setnote">poster 原註：版面不足未展示全部榜單</p>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-114.jpg" alt="校區門口榜單" loading="lazy">
+          <figcaption>校區門口 · 會考／學測</figcaption></figure>
+        <ul class="names">
+          <li>吳★葶 <b>5A10+</b><small>作文 6 級分</small></li>
+          <li>黃★涵 <b>5A8+</b></li><li>黃★澤 <b>5A7+</b></li><li>魏★愷 <b>5A7+</b></li>
+          <li>劉★宇 <b>5A5+</b></li><li>翁★庭 <b>5A3+</b></li><li>李★瑜 <b>5A3</b></li>
+          <li class="wide">學測 · 新竹高中 劉★瑋 — 錄取 <b>台灣大學 電機系</b></li>
+        </ul>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-113.jpg" alt="校區門口會考榜單" loading="lazy">
+          <figcaption>校區門口 · 會考</figcaption></figure>
+        <ul class="names">
+          <li>邱★維 <b>5A9+</b></li><li>黃★淨 <b>5A9+</b></li><li>沈★喬 <b>5A9+</b></li>
+          <li>彭★爛 <b>5A8+</b></li><li>潘★維 <b>5A8+</b></li><li>李★澤 <b>5A8+</b></li>
+          <li>黃★棋 <b>5A8+</b></li><li>詹★旂 <b>5A8+</b></li>
+        </ul>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-senior-univ.jpg" alt="高中部大學錄取榜單" loading="lazy">
+          <figcaption>高中部 · 大學錄取</figcaption></figure>
+        <ul class="names univ">
+          <li>磐石高中 鍾○瑄 — <b>國立清華大學</b> 計量財務金融學系</li>
+          <li>君毅高中 吳○諺 — <b>國立中興大學</b> 獸醫學系</li>
+          <li>竹南高中 黃○晴 — <b>國立中央大學</b> 財務金融學系</li>
+          <li>君毅高中 張○銪 — <b>國立成功大學</b> 統計與資料科學學系</li>
+          <li>竹南高中 林○妤 — <b>國立中興大學</b> 動物科學系</li>
+          <li>興華高中 陳○茵 — <b>國立政治大學</b> 財政學系</li>
+          <li>君毅高中 劉○銨 — <b>國立中央大學</b> 光電學系</li>
+          <li>君毅高中 劉○彤 — <b>國立政治大學</b> 財政學系</li>
+          <li>竹南高中 鍾○辰 — <b>國立海洋大學</b> 航運管理學系</li>
+          <li>君毅高中 羅○晴 — <b>國立台北大學</b> 經濟學系</li>
+          <li>竹南高中 林○富 — <b>國立高雄師範大學</b> 軟體工程與管理學系</li>
+          <li>竹南高中 胡○文 — <b>國立高雄師範大學</b> 特殊教育學系</li>
+          <li>君毅高中 陳○軒 — <b>國立海洋大學</b> 水產養殖學系</li>
+          <li>君毅高中 溫○筠 — <b>國立嘉義大學</b> 農藝學系</li>
+          <li>君毅高中 何○軒 — <b>國立宜蘭大學</b> 土木工程學系</li>
+          <li>君毅高中 徐○彧 — <b>國立宜蘭大學</b> 應用經濟管理學系</li>
+          <li>竹南高中 陳○廷 — <b>高雄醫學大學</b> 放射學系</li>
+          <li>興華高中 柳○言 — <b>國立台東大學</b> 英美語文學系</li>
+          <li>興華高中 鄭○樂 — <b>中國醫藥大學</b> 公共衛生學系</li>
+        </ul>
+      </article>
+
+      <article class="rollset">
+        <figure><img src="photos/roll/roll-elem-private.jpg" alt="國小部私校考試錄取榜單" loading="lazy">
+          <figcaption>國小部 · 私校考試（115）</figcaption></figure>
+        <ul class="names">
+          <li class="wide">115 錄取 <b>新竹曙光</b></li>
+          <li>黃○豪</li><li>羅○喬</li>
+          <li class="wide">115 錄取 <b>君毅國中</b></li>
+          <li>黃○瑛</li><li>黃○琁</li><li>謝○鴻</li><li>林○亦</li><li>廖○恩</li>
+          <li>吳○晏</li><li>陳○希</li><li>徐○益</li><li>溫○勳</li><li>張○丞</li>
+        </ul>
+      </article>
+
     </div>
-    <p class="rollnote">榜單皆為校區實際張貼之公告，姓名依慣例遮字。</p>
+    <p class="rollnote">以上皆為校區實際張貼之榜單，姓名依慣例遮字。</p>
   </div>
 </section>
 
