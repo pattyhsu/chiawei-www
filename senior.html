@@ -185,11 +185,20 @@
   /* 4 columns: 姓名 · 就讀高中 → 錄取大學. minmax is tuned so 1150px yields
      exactly 4 — raising it to 5 crams the arrow against the university. */
   .roll ul.namewall.univ{grid-template-columns:repeat(auto-fill,minmax(246px,1fr));gap:1px 20px}
-  .roll ul.namewall.univ li{flex-wrap:nowrap;white-space:nowrap;padding:6px 0;gap:6px}
+  /* Each row is its own 4-track grid so 姓名 / 高中 / → / 大學 line up column-wise
+     down the list. Do NOT put margin-left:auto on the 大學 — that right-aligns it
+     and leaves the arrow pointing at a gap (which is exactly how this looked
+     before 2026-08-13). */
+  .roll ul.namewall.univ li{display:grid;grid-template-columns:3.6em 3.9em 1em 1fr;
+    align-items:baseline;gap:0 8px;white-space:nowrap;padding:6px 0}
   .roll ul.namewall.univ li .who{font-weight:700;color:#fff}
   .roll ul.namewall.univ li .from{font-size:.8rem;color:#9DB2FF}
   .roll ul.namewall.univ li .arw{font-style:normal;color:var(--orange);font-weight:800}
-  .roll ul.namewall.univ li b{margin-left:auto;color:var(--gold);font-size:.88rem}
+  /* the base .namewall li b sets margin-left:auto (right-aligns the score in the
+     國中 lists). Here the 大學 sits in its own grid track, so that auto margin
+     must be RESET, not merely omitted — leaving it out inherits it and the
+     arrow ends up pointing at a 69px gap. */
+  .roll ul.namewall.univ li b{color:var(--gold);font-size:.88rem;margin-left:0}
   .setnote{margin-top:8px;font-size:.78rem;color:#8FA0D8}
   .rollnote{margin-top:14px;font-size:.84rem;color:#8FA0D8}
   .leaps{display:flex;flex-direction:column;gap:10px}
