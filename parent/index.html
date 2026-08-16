@@ -91,6 +91,27 @@
   .jHw{background:#FEF6DA;border:1px solid #F0DFA8;border-radius:8px;padding:6px 10px;margin-top:5px;font-size:.88rem}
   .jHw b{color:#8A5A00;font-size:.72rem;font-weight:800;letter-spacing:.06em;margin-right:6px}
 
+  /* 課表 */
+  .wk{display:grid;grid-template-columns:34px 1fr;gap:0 10px}
+  .wkD{
+    font-size:.76rem;font-weight:800;color:var(--muted);padding:8px 0 0;
+    border-top:1px solid #F2F4F9
+  }
+  .wkL{border-top:1px solid #F2F4F9;padding:6px 0}
+  .wk > .wkD:first-of-type,.wk > .wkD:first-of-type + .wkL{border-top:0}
+  .wkD.now{color:var(--brand)}
+  .wkR{display:flex;align-items:baseline;gap:8px;padding:2px 0;font-size:.88rem}
+  .wkR .t{font-size:.78rem;color:var(--muted);flex:none;min-width:88px}
+  .wkR .n{font-weight:700}
+  .wkR .note{
+    font-size:.68rem;font-weight:700;background:#FEF6DA;color:#8A5A00;
+    border-radius:999px;padding:1px 8px;white-space:nowrap
+  }
+  .wkToday{
+    font-size:.68rem;font-weight:800;background:var(--brand);color:#fff;
+    border-radius:999px;padding:1px 8px;margin-left:2px
+  }
+
   /* 學費 */
   .feeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;font-size:.9rem;padding:7px 0}
   .feeRow + .feeRow{border-top:1px solid #F2F4F9}
@@ -175,6 +196,11 @@
   <div class="card">
     <h2>課程與作業</h2>
     <div id="journal"></div>
+  </div>
+
+  <div class="card">
+    <h2>每週課表</h2>
+    <div id="week"></div>
   </div>
 
   <div class="card">
@@ -337,6 +363,14 @@
       .limit(40)).data || [];
     renderJournal(jrn);
 
+    // 每週課表 — parent_schedule_v (synced from schedule.data.js by
+    // scripts/sync_schedule.py; a stale sync shows parents the wrong time)
+    var wk = (await sb.from("parent_schedule_v")
+      .select("class_name, subject, weekday, starts_at, ends_at, note")
+      .eq("student_id", sid)
+      .order("weekday").order("starts_at")).data || [];
+    renderWeek(wk);
+
     // 學費 — parent_tuition_v carries only 應繳/已繳/未繳, never receipt data.
     // The enrollment count is fetched ALONGSIDE it because the view INNER JOINs
     // class_fees: an unpriced class silently produces no row, so the totals are
@@ -410,6 +444,38 @@
       if (r.homework) out += '<div class="jHw"><b>作業</b>' + esc(r.homework) + "</div>";
       return out + "</div>";
     }).join("");
+  }
+
+  var WEEKDAY = ["一", "二", "三", "四", "五", "六"];
+
+  function renderWeek(rows) {
+    var el = $("week");
+    if (!rows.length) {
+      el.innerHTML = '<p class="empty">尚未安排課表。</p>';
+      return;
+    }
+    // Only days the child actually attends get a row. A full 6-column grid
+    // would be mostly blank for a child taking two or three classes, which
+    // reads as broken rather than as "no class that day".
+    var byDay = {};
+    rows.forEach(function (r) { (byDay[r.weekday] || (byDay[r.weekday] = [])).push(r); });
+
+    // JS getDay(): 0=Sun … 6=Sat; our weekday is 1(一)…6(六). Sunday has no
+    // classes, so it simply matches nothing.
+    var todayW = new Date().getDay();
+    var hhmm = function (t) { return String(t || "").slice(0, 5); };
+
+    el.innerHTML = '<div class="wk">' + Object.keys(byDay).sort().map(function (d) {
+      var isToday = Number(d) === todayW;
+      return '<div class="wkD' + (isToday ? " now" : "") + '">週' + WEEKDAY[d - 1] + "</div>" +
+        '<div class="wkL">' + byDay[d].map(function (r) {
+          return '<div class="wkR"><span class="t num">' +
+            esc(hhmm(r.starts_at)) + "–" + esc(hhmm(r.ends_at)) + "</span>" +
+            '<span class="n">' + esc(r.class_name || "") + "</span>" +
+            (r.note ? '<span class="note">' + esc(r.note) + "</span>" : "") +
+            (isToday ? '<span class="wkToday">今天</span>' : "") + "</div>";
+        }).join("") + "</div>";
+    }).join("") + "</div>";
   }
 
   function renderFee(rows, enrolledCount) {
