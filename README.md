@@ -9,7 +9,7 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 |---|---|
 | `index.html` | 官網首頁 (brand v4 版型 + live 開課資訊) |
 | `elementary/junior/senior.html` | 年段頁 (國小/國中/高中) |
-| `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → child's 覆蓋度 report) |
+| `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → 課程/作業 · 未繳學費 · 學習進度) |
 | `offerings.js` | renders 開課資訊 from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com) |
 | `legal/privacy-v1.html` | 個資法 告知/同意文 (versioned; new version = NEW file) |
 | `robots.txt` / `sitemap.xml` | 官網 indexable |
@@ -46,21 +46,57 @@ before a single parent can log in, and neither is set yet.
    size `Full`, scopes `profile` + `openid`) and set:
    - `LIFF_ID` → `parent/index.html` (line ~182)
    - `supabase secrets set LINE_LOGIN_CHANNEL_ID=<channel id> --project-ref fngddvxroiokqmpxdwwu`
-2. **同意文 sign-off** — `legal/privacy-v1.html` needs the owner's approval before
-   the first real parent binds; `parent_bind()` records the version (`privacy-v1`)
-   as the legal basis, so whatever that file says on binding day is what was consented to.
+2. **同意文 sign-off — `legal/privacy-v2.html`** (new file, 2026-08-16). The page now
+   binds against `privacy-v2`, which discloses the two categories v2 added (學費金額,
+   課堂/作業紀錄) and restores the LINE-binding sections the 08-13 rewrite dropped.
+   It is **drafted by Claude and not lawyer-reviewed** — Patty must sign it off before
+   the first real parent binds.
+   > **🔑 A new consent version is a NEW FILE, never an edit.** `parent_bind()` stores
+   > the version string in `parent_consents` as the legal basis, so the text a family
+   > agreed to must stay recoverable verbatim. `privacy-v1.html` *was* edited in place
+   > on 08-13 while `CONSENT_VERSION` still read `privacy-v1`; that was harmless only
+   > because the table was empty. After the first bind, editing the file a family's row
+   > points at silently rewrites what they consented to — add `privacy-v3.html` instead.
+   > (`privacy-v1.html` stays on disk, still footer-linked from the four public pages as
+   > the site-wide 告知 covering the 預約表單.)
 
-> ⚠️ `legal/privacy-v1.html` describes the 家長專區 specifically — it does **not**
-> cover the 預約表單's collection of parent name/phone/child grade, which is also
-> footer-linked to it. Rewrite it as a general 告知 before relying on it.
+### What the portal shows (v2, 2026-08-16)
 
-**The portal will look empty at first, and that is correct.** The dial and 趨勢
-read only from `readiness_snapshots`; with no rows the page says 「還沒有覆蓋度快照
-——測驗批改後就會開始累積。」 As of 2026-08-16 the only graded data in the whole
-system belongs to `ZZ 測試班`'s three fake students, so every real student would
-snapshot as 0 / 100% 未測 — a stark `0` dial that reads as a verdict on the child.
-**Do not force a snapshot to fill the space**; let the 9/1 cron run after the term
-(starts 8/24) has produced real 批改.
+Three sections, in the order a parent actually uses them:
+
+1. **課程與作業** — the授課老師's 進度 + 作業 for the child's classes, newest first,
+   today's pinned and badged. From `parent_journal_v`.
+2. **本期學費** — 應繳 / 已繳 / 未繳 per class + a total. From `parent_tuition_v`.
+   **未繳金額 only** — no receipt numbers, no payment methods, no 線上繳費. That
+   half of PRD §11 E-4 stays cut; E-5 reversed only the balance.
+3. **學習進度** — the 覆蓋度 dial, unit statuses, exam history (unchanged).
+
+Both new surfaces are **security-definer views** filtered by `is_self_or_parent()`,
+not row policies — because PostgREST lets the client pick columns, so a policy on
+`teacher_journals` would let a parent `select=*` and read `notes`, the teacher's
+internal 班級狀況. A column that is not in the view cannot leak, and pgTAP 24 pins
+that with `hasnt_column`. **Never add `notes`/`teacher_id` to `parent_journal_v`,
+or `receipt_no`/`method`/`paid_on` to `parent_tuition_v`.**
+
+### ⚠️ Build now, invite later — every section is empty today
+
+`terms`, `class_fees`, `teacher_journals` and `readiness_snapshots` are all at **0
+rows**. The portal is a display layer over daily staff habits, and those habits have
+not started (the 115 term opens 8/24). **Hand out 綁定碼 only after** the 收費台 has a
+term + class fees entered, and teachers have kept 老師日誌 for ~2 weeks. A page that
+says 「尚無資料」 in all three sections costs more trust than not having one.
+
+Every section degrades to an honest empty state rather than a zero — deliberately:
+
+- no fee rows → 「本期費用尚未公告」, **never NT$0** (which reads as "you owe nothing");
+- some classes priced and others not → the total is **withheld** behind
+  「部分班別的本期費用尚未公告」, because `parent_tuition_v` INNER JOINs `class_fees`
+  and an unpriced class silently vanishes, making the sum look authoritative and low;
+- no journal → 「老師還沒有填寫課堂紀錄」, phrased as *not yet*, not as "nothing happened";
+- no snapshot → 「還沒有覆蓋度快照——測驗批改後就會開始累積。」 **Do not force a snapshot
+  to fill that space**: as of 2026-08-16 the only graded data in the system belongs to
+  `ZZ 測試班`'s fake students, so every real child would render a stark `0` at 100% 未測.
+  Let the 9/1 cron run after the term has produced real 批改.
 
 ## Content pour (owner) — 示意 badges removed 2026-08-13
 

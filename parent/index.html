@@ -77,6 +77,32 @@
   .c-near{background:#E9EDFB;color:var(--ink)}
   .c-unstable{background:#FEF6DA;color:#8A5A00}
 
+  /* 課程與作業 (老師日誌) */
+  .jRow{padding:11px 0;border-top:1px solid #F2F4F9}
+  .jRow:first-child{border-top:0}
+  .jRow.today{background:var(--blue-tint);border-radius:10px;padding:11px 12px;border-top:0;margin-bottom:2px}
+  .jHead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+  .jHead .d{font-size:.78rem;font-weight:800;color:var(--muted)}
+  .jRow.today .jHead .d{color:var(--brand)}
+  .jHead .c{font-size:.9rem;font-weight:800}
+  .jHead .badge{font-size:.66rem;font-weight:800;background:var(--brand);color:#fff;border-radius:999px;padding:1px 8px}
+  .jField{font-size:.88rem;margin-top:2px}
+  .jField b{font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-right:6px}
+  .jHw{background:#FEF6DA;border:1px solid #F0DFA8;border-radius:8px;padding:6px 10px;margin-top:5px;font-size:.88rem}
+  .jHw b{color:#8A5A00;font-size:.72rem;font-weight:800;letter-spacing:.06em;margin-right:6px}
+
+  /* 學費 */
+  .feeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;font-size:.9rem;padding:7px 0}
+  .feeRow + .feeRow{border-top:1px solid #F2F4F9}
+  .feeRow small{display:block;color:var(--muted);font-size:.74rem}
+  .feeRow .amt{font-weight:800}
+  .feeRow .amt.due{color:var(--orange)}
+  .feeTot{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;padding-top:10px;border-top:2px solid var(--line);font-weight:900}
+  .feeTot .v{font-size:1.35rem;color:var(--orange)}
+  .feeTot .v.clear{color:var(--brand)}
+  .warn{margin-top:10px;font-size:.82rem;font-weight:700;color:#8A5A00;background:#FEF6DA;border:1px solid #F0DFA8;border-radius:8px;padding:8px 11px;line-height:1.6}
+  .payhint{margin-top:8px;font-size:.78rem;color:var(--muted)}
+
   table{width:100%;border-collapse:collapse;font-size:.88rem}
   th{text-align:left;font-size:.68rem;letter-spacing:.08em;color:var(--muted);font-weight:800;padding:0 6px 6px;border-bottom:1px solid var(--line)}
   td{padding:7px 6px;border-bottom:1px solid #F4F5F9}
@@ -132,7 +158,7 @@
     <input type="text" id="bindcode" maxlength="8" autocomplete="off" placeholder="綁定碼">
     <label>
       <input type="checkbox" id="consent">
-      <span>我已閱讀並同意 <a href="../legal/privacy-v1.html" target="_blank" rel="noopener">個人資料保護說明（privacy-v1）</a>，同意本班依說明蒐集、處理及利用我與子女的個人資料，以提供家長專區服務。</span>
+      <span>我已閱讀並同意 <a href="../legal/privacy-v2.html" target="_blank" rel="noopener">個人資料保護說明（privacy-v2）</a>，同意本班依說明蒐集、處理及利用我與子女的個人資料，以提供家長專區服務。</span>
     </label>
     <button class="btn" id="bindbtn">完成綁定</button>
     <div class="err" id="binderr"></div>
@@ -142,6 +168,19 @@
 <!-- the report -->
 <div class="wrap hidden" id="st-report">
   <div class="tabs" id="tabs"></div>
+
+  <!-- 課程與作業 sits FIRST: it is the thing a parent opens this page for on a
+       normal weekday. 學費 follows (a monthly nudge, not a daily one), then the
+       progress report, which is the deepest but least frequently read. -->
+  <div class="card">
+    <h2>課程與作業</h2>
+    <div id="journal"></div>
+  </div>
+
+  <div class="card">
+    <h2>本期學費</h2>
+    <div id="fee"></div>
+  </div>
 
   <div class="card">
     <h2>會考考點覆蓋度 · 數學</h2>
@@ -182,7 +221,9 @@
   var LIFF_ID = "";                          // ← set when the LIFF app exists (LINE console)
   var SUPABASE_URL = "https://fngddvxroiokqmpxdwwu.supabase.co";
   var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuZ2Rkdnhyb2lva3FtcHhkd3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjYzMzgsImV4cCI6MjA5Njc0MjMzOH0.x5PQWx-V8gyJvcsNMSFoJYjRWCXgt1fcUAfkhCjlVE0";
-  var CONSENT_VERSION = "privacy-v1";        // must match legal/privacy-v1.html
+  var CONSENT_VERSION = "privacy-v2";        // must match legal/privacy-v2.html (a new
+  // version is a NEW FILE, never an edit — parent_consents rows point at this
+  // string as the legal basis, so the text must stay recoverable verbatim)
   var STATUS_ORDER = { "不穩": 0, "接近": 1, "精熟": 2 };
   var STATUS_CHIP = { "不穩": "c-unstable", "接近": "c-near", "精熟": "c-mastered" };
 
@@ -287,6 +328,27 @@
   }
 
   async function loadChild(sid) {
+    // 課程與作業 — parent_journal_v (definer view; the base table is staff-only
+    // and carries `notes`, the teacher's internal 班級狀況, which the view omits)
+    var jrn = (await sb.from("parent_journal_v")
+      .select("class_id, class_name, subject, entry_date, progress, homework")
+      .eq("student_id", sid)
+      .order("entry_date", { ascending: false })
+      .limit(40)).data || [];
+    renderJournal(jrn);
+
+    // 學費 — parent_tuition_v carries only 應繳/已繳/未繳, never receipt data.
+    // The enrollment count is fetched ALONGSIDE it because the view INNER JOINs
+    // class_fees: an unpriced class silently produces no row, so the totals are
+    // only trustworthy when these two agree. See renderFee.
+    var fee = (await sb.from("parent_tuition_v")
+      .select("class_id, class_name, term_name, expected, paid, outstanding")
+      .eq("student_id", sid)).data || [];
+    var enr = (await sb.from("enrollments")
+      .select("class_id")
+      .eq("student_id", sid).eq("active", true)).data || [];
+    renderFee(fee, enr.length);
+
     // snapshots (persisted by the monthly clock / grading recompute)
     var snaps = (await sb.from("readiness_snapshots")
       .select("snapshot_date, readiness, pct_mastered, pct_weak, pct_untested")
@@ -317,6 +379,76 @@
   }
 
   // ── renderers ─────────────────────────────────────────────────────────────
+
+  /** Today's date in the VIEWER'S local zone. Deliberately not toISOString(),
+   *  which is UTC and stamps the wrong day for Taiwan (UTC+8) for eight hours
+   *  every evening — the same bug the readiness snapshot script hit. */
+  function todayLocal() {
+    var d = new Date();
+    return d.getFullYear() + "-" +
+           String(d.getMonth() + 1).padStart(2, "0") + "-" +
+           String(d.getDate()).padStart(2, "0");
+  }
+
+  function renderJournal(rows) {
+    var el = $("journal");
+    if (!rows.length) {
+      // Phrased as "not yet", never as "nothing happened" — a blank journal
+      // means the teacher has not written it up, not that the class did nothing.
+      el.innerHTML = '<p class="empty">老師還沒有填寫課堂紀錄。上課後老師會在這裡寫下當天進度與作業。</p>';
+      return;
+    }
+    var today = todayLocal();
+    el.innerHTML = rows.map(function (r) {
+      var isToday = r.entry_date === today;
+      var md = esc((r.entry_date || "").slice(5).replace("-", "/"));
+      var out = '<div class="jRow' + (isToday ? " today" : "") + '">' +
+        '<div class="jHead"><span class="d num">' + md + "</span>" +
+        '<span class="c">' + esc(r.class_name || "") + "</span>" +
+        (isToday ? '<span class="badge">今天</span>' : "") + "</div>";
+      if (r.progress) out += '<div class="jField"><b>進度</b>' + esc(r.progress) + "</div>";
+      if (r.homework) out += '<div class="jHw"><b>作業</b>' + esc(r.homework) + "</div>";
+      return out + "</div>";
+    }).join("");
+  }
+
+  function renderFee(rows, enrolledCount) {
+    var el = $("fee");
+    // No priced class at all → the school has not published this term's fees.
+    // Say so; do NOT render 0, which reads as "you owe nothing".
+    if (!rows.length) {
+      el.innerHTML = '<p class="empty">本期費用尚未公告。</p>' +
+        '<p class="payhint">如需確認繳費狀況，請洽櫃檯。</p>';
+      return;
+    }
+    var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
+    var total = rows.reduce(function (a, r) { return a + Number(r.outstanding || 0); }, 0);
+    var term = rows[0].term_name || "";
+
+    var html = rows.map(function (r) {
+      var due = Number(r.outstanding || 0);
+      return '<div class="feeRow"><span>' + esc(r.class_name || "") +
+        "<small>應繳 " + money(r.expected) + "　已繳 " + money(r.paid) + "</small></span>" +
+        '<span class="amt num' + (due > 0 ? " due" : "") + '">' + money(due) + "</span></div>";
+    }).join("");
+
+    html += '<div class="feeTot"><span>' + esc(term) + " 未繳合計</span>" +
+      '<span class="v num' + (total <= 0 ? " clear" : "") + '">' +
+      (total <= 0 ? "已繳清" : money(total)) + "</span></div>";
+
+    // 🔑 parent_tuition_v INNER JOINs class_fees, so a class whose fee has not
+    // been entered yet produces NO ROW — the total above would then be lower
+    // than what is actually owed, while looking authoritative. When the counts
+    // disagree we withhold the claim rather than present a number we cannot
+    // vouch for. (Same principle as absent≠zero: a figure derived from partial
+    // data is a false statement, not a neutral one.)
+    if (enrolledCount > rows.length) {
+      html += '<div class="warn">部分班別的本期費用尚未公告，上列金額並非全部應繳項目，請以櫃檯結算為準。</div>';
+    }
+    html += '<p class="payhint">繳費或對帳請洽櫃檯；本頁僅顯示金額，不提供收據查詢。</p>';
+    el.innerHTML = html;
+  }
+
   function renderReadiness(snaps) {
     var el = $("rd");
     if (!snaps.length) {
