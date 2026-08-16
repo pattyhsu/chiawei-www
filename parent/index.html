@@ -77,6 +77,15 @@
   .c-near{background:#E9EDFB;color:var(--ink)}
   .c-unstable{background:#FEF6DA;color:#8A5A00}
 
+  /* 老師提醒 (pinned) */
+  .ntc{background:#FEF6DA;border:1px solid #F0DFA8;border-left:4px solid var(--gold);
+       border-radius:11px;padding:11px 13px;margin-bottom:14px}
+  .ntc + .ntc{margin-top:-6px}
+  .ntcH{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+  .ntcH b{font-size:.72rem;font-weight:800;color:#8A5A00;letter-spacing:.04em}
+  .ntcH .c{font-size:.78rem;font-weight:800;color:var(--ink)}
+  .ntcT{font-size:.92rem;color:#33384c;line-height:1.65}
+
   /* 課程與作業 (老師日誌) */
   .jRow{padding:11px 0;border-top:1px solid #F2F4F9}
   .jRow:first-child{border-top:0}
@@ -189,6 +198,10 @@
 <!-- the report -->
 <div class="wrap hidden" id="st-report">
   <div class="tabs" id="tabs"></div>
+
+  <!-- 老師提醒 pins ABOVE everything: it is forward-looking (「本週六加課」) and
+       time-boxed, so burying it under today's homework would defeat it. -->
+  <div id="notices"></div>
 
   <!-- 課程與作業 sits FIRST: it is the thing a parent opens this page for on a
        normal weekday. 學費 follows (a monthly nudge, not a daily one), then the
@@ -354,6 +367,13 @@
   }
 
   async function loadChild(sid) {
+    // 老師提醒 — parent_notice_v (pinned; the view already drops expired ones)
+    var ntc = (await sb.from("parent_notice_v")
+      .select("class_name, entry_date, show_until, notice")
+      .eq("student_id", sid)
+      .order("entry_date", { ascending: false })).data || [];
+    renderNotices(ntc);
+
     // 課程與作業 — parent_journal_v (definer view; the base table is staff-only
     // and carries `notes`, the teacher's internal 班級狀況, which the view omits)
     var jrn = (await sb.from("parent_journal_v")
@@ -422,6 +442,18 @@
     return d.getFullYear() + "-" +
            String(d.getMonth() + 1).padStart(2, "0") + "-" +
            String(d.getDate()).padStart(2, "0");
+  }
+
+  function renderNotices(rows) {
+    var el = $("notices");
+    // No empty state on purpose: a 提醒 is occasional, so 「目前沒有提醒」 every
+    // day would be noise. The section simply is not there when there is nothing.
+    if (!rows.length) { el.innerHTML = ""; return; }
+    el.innerHTML = rows.map(function (r) {
+      return '<div class="ntc"><div class="ntcH"><b>老師提醒</b>' +
+        '<span class="c">' + esc(r.class_name || "") + "</span></div>" +
+        '<div class="ntcT">' + esc(r.notice || "") + "</div></div>";
+    }).join("");
   }
 
   function renderJournal(rows) {
