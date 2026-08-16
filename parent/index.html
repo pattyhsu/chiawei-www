@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>家偉文理補習班｜家長專區</title>
+<link rel="icon" type="image/svg+xml" href="../ant-logo.svg">
+<!--
+  家長專區 — LIFF page (also works in a normal browser via LINE Login).
+
+  Load order matters: LIFF SDK + supabase-js CDN → this page's inline script.
+  Auth: liff.getIDToken() → parent-login Edge Function → verifyOtp(token_hash)
+  → a real Supabase session. EVERYTHING after that is plain PostgREST under
+  RLS (is_self_or_parent + parent_bind RPC) — this page holds no secrets and
+  is not a security boundary; the database is.
+
+  LIFF_ID is empty until the LINE Login channel + LIFF app exist (owner
+  prerequisite, LINE Developers console, SAME provider as the school OA).
+  With it empty the page shows 尚未開通 and does nothing else.
+-->
+<style>
+  :root{
+    --brand:#2547C7; --blue-deep:#1A2F86; --blue-ink:#0F1C4D; --gold:#F8C414; --orange:#EF5226;
+    --level-0:#EF5226; --level-1:#D9A400; --level-2:#5B85DC; --level-3:#2547C7;
+    --ink:#141A2E; --muted:#6B7280; --line:#E3E6EE; --untested:#DFE3ED;
+    --paper:#F5F7FC; --card:#fff; --blue-tint:#EEF1FC;
+    --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;box-sizing:border-box}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.75;-webkit-font-smoothing:antialiased;padding-bottom:48px}
+  .num{font-variant-numeric:tabular-nums lining-nums}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px}
+  header.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:16px}
+  .top-in{max-width:640px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:10px}
+  .top-in img{height:32px}
+  .top-in b{font-size:1rem;font-weight:900}
+  .top-in .who{margin-left:auto;font-size:.78rem;color:var(--muted);text-align:right}
+  .top-in .who a{color:var(--brand);text-decoration:none;font-weight:700}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  h2{font-size:.95rem;font-weight:800;letter-spacing:.02em;margin-bottom:10px;padding-left:9px;border-left:3px solid var(--brand)}
+  .state{max-width:640px;margin:48px auto;padding:0 16px;text-align:center;color:var(--muted)}
+  .state b{display:block;font-size:1.05rem;color:var(--ink);margin-bottom:6px}
+  .btn{display:inline-block;border:0;border-radius:10px;font-weight:800;font-family:var(--sans);font-size:1rem;padding:11px 22px;background:var(--brand);color:#fff;cursor:pointer}
+  .btn:disabled{opacity:.5}
+  .btn.ghost{background:#fff;border:2px solid var(--brand);color:var(--brand)}
+  .hidden{display:none !important}
+
+  /* child tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .tabs button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 18px;font-weight:800;font-size:.92rem;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+  .tabs button.on{border-color:var(--brand);color:var(--brand);background:var(--blue-tint)}
+  .tabs .add{border-style:dashed}
+
+  /* readiness */
+  .rdWrap{display:flex;gap:16px;align-items:center}
+  .rdScore{flex:none;text-align:center;width:86px}
+  .rdScore b{display:block;font-size:40px;font-weight:900;line-height:1.1;color:var(--brand)}
+  .rdScore span{font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.06em}
+  .rdRight{flex:1;min-width:0}
+  .rdBar{display:flex;height:20px;border-radius:999px;overflow:hidden;background:#EEF1F8}
+  .rdSeg{display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;color:#fff;min-width:0}
+  .rdSeg.mastered{background:var(--level-3)}
+  .rdSeg.weak{background:var(--level-1);color:var(--ink)}
+  .rdSeg.untested{background:var(--untested);color:var(--muted)}
+  .rdLegend{display:flex;gap:12px;margin-top:8px;font-size:.72rem;flex-wrap:wrap}
+  .rdLegend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+  .disclaim{margin-top:12px;font-size:.8rem;font-weight:700;color:#8A5A00;background:#FEF6DA;border:1px solid #F0DFA8;border-radius:8px;padding:8px 11px;line-height:1.6}
+  .disclaim span{display:block;font-weight:400;color:#6B5A2E;margin-top:3px}
+
+  /* unit list */
+  .uRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;font-size:.9rem;padding:7px 0}
+  .uRow + .uRow{border-top:1px solid #F2F4F9}
+  .uRow small{color:var(--muted);font-size:.74rem;display:block}
+  .chip{font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap}
+  .c-mastered{background:#EEF1FC;color:var(--brand)}
+  .c-near{background:#E9EDFB;color:var(--ink)}
+  .c-unstable{background:#FEF6DA;color:#8A5A00}
+
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;font-size:.68rem;letter-spacing:.08em;color:var(--muted);font-weight:800;padding:0 6px 6px;border-bottom:1px solid var(--line)}
+  td{padding:7px 6px;border-bottom:1px solid #F4F5F9}
+  tr:last-child td{border-bottom:0}
+  .empty{color:var(--muted);font-size:.88rem}
+
+  /* bind screen */
+  .bind input[type=text]{width:100%;border:2px solid var(--line);border-radius:10px;padding:12px 14px;font-size:1.2rem;letter-spacing:.35em;text-transform:uppercase;font-family:var(--sans);text-align:center;margin:10px 0}
+  .bind input[type=text]:focus{outline:none;border-color:var(--brand)}
+  .bind label{display:flex;gap:8px;align-items:flex-start;font-size:.86rem;color:#33384c;margin:10px 0 16px}
+  .bind label a{color:var(--brand);font-weight:700}
+  .bind .err{color:var(--orange);font-size:.85rem;font-weight:700;margin-top:10px;min-height:1.4em}
+
+  /* offerings reuse (matches offerings.js markup) */
+  .off-row{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .off-main{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .off-main b{font-size:.95rem;font-weight:800}
+  .off-tag{font-size:.72rem;background:var(--blue-tint);color:var(--blue-deep);border-radius:999px;padding:2px 10px;font-weight:700}
+  .off-meta{margin-top:4px;font-size:.82rem;color:#33384c}
+  .off-note{margin-top:2px;font-size:.78rem;color:var(--muted)}
+  .off-empty{color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <img src="../ant-logo.svg" alt="">
+    <b>家長專區</b>
+    <span class="who" id="who"></span>
+  </div>
+</header>
+
+<div class="state" id="st-loading"><b>載入中…</b>正在確認您的身分</div>
+
+<div class="state hidden" id="st-notopen">
+  <b>家長專區尚未開通</b>
+  正式開放時會在班內與 LINE 官方帳號公告，敬請期待。<br><br>
+  <a class="btn ghost" href="../">回官網首頁</a>
+</div>
+
+<div class="state hidden" id="st-error">
+  <b>暫時無法載入</b>
+  <span id="errmsg">請稍後再試，或聯繫班上櫃檯。</span><br><br>
+  <button class="btn ghost" onclick="location.reload()">重試</button>
+</div>
+
+<!-- first run: consent + 綁定碼 -->
+<div class="wrap hidden" id="st-bind">
+  <div class="card bind">
+    <h2>綁定孩子</h2>
+    <p style="font-size:.9rem;color:#33384c">請輸入班上提供給您的 <b>8 碼綁定碼</b>（紙條或 LINE 訊息）。綁定後即可查看孩子的學習狀況。</p>
+    <input type="text" id="bindcode" maxlength="8" autocomplete="off" placeholder="綁定碼">
+    <label>
+      <input type="checkbox" id="consent">
+      <span>我已閱讀並同意 <a href="../legal/privacy-v1.html" target="_blank" rel="noopener">個人資料保護說明（privacy-v1）</a>，同意本班依說明蒐集、處理及利用我與子女的個人資料，以提供家長專區服務。</span>
+    </label>
+    <button class="btn" id="bindbtn">完成綁定</button>
+    <div class="err" id="binderr"></div>
+  </div>
+</div>
+
+<!-- the report -->
+<div class="wrap hidden" id="st-report">
+  <div class="tabs" id="tabs"></div>
+
+  <div class="card">
+    <h2>會考考點覆蓋度 · 數學</h2>
+    <div id="rd"></div>
+    <p class="disclaim">此為考點覆蓋度，非成績預測
+      <span>這個數字表示：在會考「已教過的範圍」裡，孩子目前已經穩定掌握了多少比重的考點。它衡量的是準備進度，不是會考會考幾分。</span>
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>準備度變化</h2>
+    <div id="trend"></div>
+  </div>
+
+  <div class="card">
+    <h2>單元掌握狀況 · 數學</h2>
+    <div id="units"></div>
+    <p class="empty" style="margin-top:8px;font-size:.76rem">僅列出已有測驗紀錄的單元；「不穩」代表最近的作答還不穩定，是最值得優先加強的地方。</p>
+  </div>
+
+  <div class="card">
+    <h2>近期測驗</h2>
+    <div id="exams"></div>
+  </div>
+
+  <div class="card">
+    <h2>近期開課資訊</h2>
+    <div data-offerings></div>
+  </div>
+</div>
+
+<script src="https://static.line.me/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../offerings.js" defer></script>
+<script>
+(function () {
+  // ── config ────────────────────────────────────────────────────────────────
+  var LIFF_ID = "";                          // ← set when the LIFF app exists (LINE console)
+  var SUPABASE_URL = "https://fngddvxroiokqmpxdwwu.supabase.co";
+  var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuZ2Rkdnhyb2lva3FtcHhkd3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjYzMzgsImV4cCI6MjA5Njc0MjMzOH0.x5PQWx-V8gyJvcsNMSFoJYjRWCXgt1fcUAfkhCjlVE0";
+  var CONSENT_VERSION = "privacy-v1";        // must match legal/privacy-v1.html
+  var STATUS_ORDER = { "不穩": 0, "接近": 1, "精熟": 2 };
+  var STATUS_CHIP = { "不穩": "c-unstable", "接近": "c-near", "精熟": "c-mastered" };
+
+  var sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+  var kids = [];      // [{id, name, student_no}]
+  var current = null; // active student id
+
+  var DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+  function $(id) { return document.getElementById(id); }
+  function show(id) {
+    ["st-loading", "st-notopen", "st-error", "st-bind", "st-report"].forEach(function (s) {
+      $(s).classList.toggle("hidden", s !== id);
+    });
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function oops(msg) { $("errmsg").textContent = msg || "請稍後再試，或聯繫班上櫃檯。"; show("st-error"); }
+
+  // ── auth ──────────────────────────────────────────────────────────────────
+  async function ensureSession() {
+    var s = await sb.auth.getSession();
+    if (s.data.session) return true;
+    // LINE's webview can drop localStorage — silently re-run the LIFF loop.
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return false; }
+    var idToken = liff.getIDToken();
+    if (!idToken) { liff.login({ redirectUri: location.href }); return false; }
+    var res = await fetch(SUPABASE_URL + "/functions/v1/parent-login", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        apikey: ANON_KEY,
+        Authorization: "Bearer " + ANON_KEY,
+      },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    var out = await res.json().catch(function () { return {}; });
+    if (!res.ok || !out.token_hash) {
+      if (out.error === "bad_token") { liff.logout(); location.reload(); return false; }
+      if (out.error === "deactivated") { oops("此帳號的存取權已停用，請聯繫班上櫃檯。"); return false; }
+      oops(out.error === "rate_limited" ? "登入次數過多，請一小時後再試。" : "登入服務暫時無法使用。");
+      return false;
+    }
+    var v = await sb.auth.verifyOtp({ token_hash: out.token_hash, type: "magiclink" });
+    if (v.error) { oops("登入驗證失敗，請重試。"); return false; }
+    return true;
+  }
+
+  // ── binding ───────────────────────────────────────────────────────────────
+  function wireBind() {
+    $("bindbtn").onclick = async function () {
+      var code = $("bindcode").value.trim().toUpperCase();
+      $("binderr").textContent = "";
+      if (!/^[A-Z0-9]{8}$/.test(code)) { $("binderr").textContent = "綁定碼是 8 碼英數字，請再確認。"; return; }
+      if (!$("consent").checked) { $("binderr").textContent = "請先閱讀並勾選同意個人資料保護說明。"; return; }
+      $("bindbtn").disabled = true;
+      var r = await sb.rpc("parent_bind", { p_code: code, p_consent_version: CONSENT_VERSION });
+      $("bindbtn").disabled = false;
+      var out = r.data || {};
+      if (r.error) { $("binderr").textContent = "綁定服務暫時無法使用，請稍後再試。"; return; }
+      if (!out.ok) {
+        $("binderr").textContent =
+          out.error === "invalid_code" ? "綁定碼無效或已過期，請向班上確認。" :
+          out.error === "rate_limited" ? "嘗試次數過多，請一小時後再試。" :
+          out.error === "consent_required" ? "請先勾選同意。" : "綁定失敗，請聯繫班上櫃檯。";
+        return;
+      }
+      await loadKids();
+      renderTabs();
+      if (kids.length) { current = out.student_id || kids[0].id; show("st-report"); loadChild(current); }
+    };
+  }
+
+  // ── data ──────────────────────────────────────────────────────────────────
+  async function loadKids() {
+    var r = await sb.from("parent_student")
+      .select("student_id, students(id, full_name, student_no, grade, school)");
+    kids = (r.data || []).map(function (row) {
+      var st = row.students || {};
+      return { id: row.student_id, name: st.full_name || "孩子", student_no: st.student_no || "" };
+    });
+  }
+
+  function renderTabs() {
+    var t = $("tabs");
+    t.innerHTML = "";
+    kids.forEach(function (k) {
+      var b = document.createElement("button");
+      b.textContent = k.name;
+      b.className = k.id === current ? "on" : "";
+      b.onclick = function () { current = k.id; renderTabs(); loadChild(k.id); };
+      t.appendChild(b);
+    });
+    var add = document.createElement("button");
+    add.className = "add";
+    add.textContent = "＋ 綁定另一個孩子";
+    add.onclick = function () { show("st-bind"); };
+    t.appendChild(add);
+  }
+
+  async function loadChild(sid) {
+    // snapshots (persisted by the monthly clock / grading recompute)
+    var snaps = (await sb.from("readiness_snapshots")
+      .select("snapshot_date, readiness, pct_mastered, pct_weak, pct_untested")
+      .eq("student_id", sid).eq("subject", "數學")
+      .order("snapshot_date")).data || [];
+    renderReadiness(snaps);
+    renderTrend(snaps);
+
+    // archetype mastery → labels (chunked .in() — never a bare 1000-cap select)
+    var mast = (await sb.from("student_archetype_mastery")
+      .select("archetype_id, status, n_attempts")
+      .eq("student_id", sid).eq("subject", "數學")).data || [];
+    var ids = mast.map(function (m) { return m.archetype_id; });
+    var labels = {};
+    for (var i = 0; i < ids.length; i += 150) {
+      var part = (await sb.from("taxonomy_labels_v")
+        .select("archetype_id, unit_id, unit_name")
+        .in("archetype_id", ids.slice(i, i + 150))).data || [];
+      part.forEach(function (l) { labels[l.archetype_id] = l; });
+    }
+    renderUnits(mast, labels);
+
+    // recent graded exams (child's own scores under RLS)
+    var sc = (await sb.from("scores")
+      .select("score_100, exams(name, exam_date, status)")
+      .eq("student_id", sid)).data || [];
+    renderExams(sc);
+  }
+
+  // ── renderers ─────────────────────────────────────────────────────────────
+  function renderReadiness(snaps) {
+    var el = $("rd");
+    if (!snaps.length) {
+      el.innerHTML = '<p class="empty">還沒有覆蓋度快照——測驗批改後就會開始累積。</p>';
+      return;
+    }
+    var s = snaps[snaps.length - 1];
+    var m = Math.round(s.pct_mastered), w = Math.round(s.pct_weak), u = Math.round(s.pct_untested);
+    function seg(cls, pct) {
+      return '<div class="rdSeg ' + cls + ' num" style="width:' + pct + '%">' + (pct >= 12 ? pct + "%" : "") + "</div>";
+    }
+    el.innerHTML =
+      '<div class="rdWrap">' +
+      '<div class="rdScore"><b class="num">' + Math.round(s.readiness) + "</b><span>已學範圍</span></div>" +
+      '<div class="rdRight"><div class="rdBar">' + seg("mastered", m) + seg("weak", w) + seg("untested", u) + "</div>" +
+      '<div class="rdLegend">' +
+      '<span><i style="background:var(--level-3)"></i>已精熟 <b class="num">' + m + "%</b></span>" +
+      '<span><i style="background:var(--level-1)"></i>尚不穩 <b class="num">' + w + "%</b></span>" +
+      '<span><i style="background:var(--untested)"></i>尚未測到 <b class="num">' + u + "%</b></span>" +
+      "</div><p class=\"empty num\" style=\"margin-top:6px;font-size:.74rem\">統計至 " + esc(s.snapshot_date) + "</p></div></div>";
+  }
+
+  function renderTrend(snaps) {
+    var el = $("trend");
+    if (snaps.length < 2) {
+      el.innerHTML = '<p class="empty">快照累積兩期後，這裡會畫出變化趨勢。</p>';
+      return;
+    }
+    var W = 300, H = 120, L = 28, R = 10, T = 12, B = 24;
+    var xs = function (i) { return L + (W - L - R) * (snaps.length === 1 ? 0 : i / (snaps.length - 1)); };
+    var ys = function (v) { return T + (H - T - B) * (1 - v / 100); };
+    var pts = snaps.map(function (s, i) { return xs(i).toFixed(1) + "," + ys(s.readiness).toFixed(1); }).join(" ");
+    var last = snaps[snaps.length - 1];
+    var svg = '<svg viewBox="0 0 300 120" width="100%" role="img" aria-label="準備度趨勢">';
+    [0, 50, 100].forEach(function (v) {
+      svg += '<line x1="' + L + '" y1="' + ys(v) + '" x2="' + (W - R) + '" y2="' + ys(v) + '" stroke="#EEF1F8"/>' +
+             '<text x="' + (L - 4) + '" y="' + (ys(v) + 3) + '" font-size="8" fill="#6B7280" text-anchor="end">' + v + "</text>";
+    });
+    svg += '<polyline fill="none" stroke="#2547C7" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="' + pts + '"/>';
+    snaps.forEach(function (s, i) {
+      svg += '<circle cx="' + xs(i) + '" cy="' + ys(s.readiness) + '" r="2.6" fill="#2547C7"/>';
+    });
+    svg += '<text x="' + xs(snaps.length - 1) + '" y="' + (ys(last.readiness) - 8) + '" font-size="9" font-weight="700" fill="#2547C7" text-anchor="middle">' + Math.round(last.readiness) + "</text>";
+    snaps.forEach(function (s, i) {
+      var mm = parseInt(s.snapshot_date.slice(5, 7), 10) + "月";
+      svg += '<text x="' + xs(i) + '" y="' + (H - 8) + '" font-size="8" fill="#6B7280" text-anchor="middle">' + mm + "</text>";
+    });
+    el.innerHTML = svg + "</svg>";
+  }
+
+  function renderUnits(mast, labels) {
+    var el = $("units");
+    if (!mast.length) {
+      el.innerHTML = '<p class="empty">還沒有測驗紀錄。</p>';
+      return;
+    }
+    var units = {};
+    mast.forEach(function (m) {
+      var l = labels[m.archetype_id];
+      if (!l || !(m.status in STATUS_ORDER)) return;
+      var u = units[l.unit_id] || (units[l.unit_id] = { name: l.unit_name, worst: 9, n: 0 });
+      u.n += 1;
+      u.worst = Math.min(u.worst, STATUS_ORDER[m.status]);
+    });
+    var rows = Object.keys(units).map(function (k) { return units[k]; });
+    rows.sort(function (a, b) { return a.worst - b.worst || b.n - a.n; });
+    var names = ["不穩", "接近", "精熟"];
+    el.innerHTML = rows.map(function (u) {
+      var st = names[u.worst];
+      return '<div class="uRow"><span>' + esc(u.name) +
+        '<small>已測 ' + u.n + " 類題型</small></span>" +
+        '<span class="chip ' + STATUS_CHIP[st] + '">' + st + "</span></div>";
+    }).join("") || '<p class="empty">還沒有測驗紀錄。</p>';
+  }
+
+  function renderExams(sc) {
+    var el = $("exams");
+    var rows = (sc || [])
+      .filter(function (r) { return r.exams && r.exams.status === "graded" && r.score_100 != null; })
+      .sort(function (a, b) { return (b.exams.exam_date || "").localeCompare(a.exams.exam_date || ""); })
+      .slice(0, 12);
+    if (!rows.length) {
+      el.innerHTML = '<p class="empty">還沒有已批改的測驗。</p>';
+      return;
+    }
+    el.innerHTML = "<table><thead><tr><th>日期</th><th>測驗</th><th style=\"text-align:right\">分數</th></tr></thead><tbody>" +
+      rows.map(function (r) {
+        return "<tr><td class=\"num\">" + esc((r.exams.exam_date || "").slice(5)) + "</td><td>" +
+          esc(r.exams.name || "") + "</td><td style=\"text-align:right\"><b class=\"num\">" +
+          Math.round(r.score_100) + "</b></td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+
+  // ── boot ──────────────────────────────────────────────────────────────────
+  async function boot() {
+    if (DEV) {
+      // localhost preview: no LIFF. A one-time link carries #th=<token_hash>
+      // (minted server-side for a seeded TEST parent — the same magiclink
+      // mechanism the LINE flow uses); redeeming it persists a session, so
+      // later visits need no link. No credentials exist on this page.
+      var m = location.hash.match(/th=([A-Za-z0-9_-]+)/);
+      if (m) {
+        history.replaceState(null, "", location.pathname);
+        var dv = await sb.auth.verifyOtp({ token_hash: m[1], type: "magiclink" });
+        if (dv.error) { oops("測試連結無效或已過期，請重新產生一條。"); return; }
+      } else {
+        var s = await sb.auth.getSession();
+        if (!s.data.session) { oops("測試模式：請由帶 token 的測試連結進入。"); return; }
+      }
+    } else {
+      if (!LIFF_ID) { show("st-notopen"); return; }
+      try {
+        await liff.init({ liffId: LIFF_ID });
+      } catch (e) { oops("LINE 登入初始化失敗。"); return; }
+      if (!(await ensureSession())) return;
+    }
+    $("who").innerHTML = '<a href="#" id="signout">登出</a>';
+    $("signout").onclick = function (ev) {
+      ev.preventDefault();
+      sb.auth.signOut().then(function () { try { liff.logout(); } catch (e) {} location.reload(); });
+    };
+    wireBind();
+    await loadKids();
+    if (!kids.length) { show("st-bind"); return; }
+    current = kids[0].id;
+    renderTabs();
+    show("st-report");
+    loadChild(current);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
