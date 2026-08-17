@@ -121,6 +121,19 @@
     border-radius:999px;padding:1px 8px;margin-left:2px
   }
 
+  /* 餐費 (prepaid balance) */
+  .mlTop{display:flex;justify-content:space-between;align-items:baseline}
+  .mlTop .lab{font-size:.8rem;color:var(--muted);font-weight:700}
+  .mlTop .bal{font-size:1.6rem;font-weight:900;color:var(--brand)}
+  .mlTop .bal.low{color:var(--orange)}
+  .mlChip{display:inline-block;font-size:.7rem;font-weight:800;border-radius:999px;
+          padding:2px 10px;background:#FEF6DA;color:#8A5A00;margin-top:4px}
+  .mlR{display:flex;justify-content:space-between;font-size:.86rem;padding:6px 0;border-top:1px solid #F2F4F9}
+  .mlR .dt{color:var(--muted)}
+  .mlR .v{font-weight:700}
+  .mlR .v.plus{color:#1F7A4D}
+  .mlNote{margin-top:8px;font-size:.78rem;color:var(--muted)}
+
   /* 學費 */
   .feeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;font-size:.9rem;padding:7px 0}
   .feeRow + .feeRow{border-top:1px solid #F2F4F9}
@@ -219,6 +232,11 @@
   <div class="card">
     <h2>本期學費</h2>
     <div id="fee"></div>
+  </div>
+
+  <div class="card">
+    <h2>餐費餘額</h2>
+    <div id="meal"></div>
   </div>
 
   <div class="card">
@@ -403,6 +421,16 @@
       .eq("student_id", sid).eq("active", true)).data || [];
     renderFee(fee, enr.length);
 
+    // 餐費 — balance over ALL history, detail windowed. Two queries on purpose:
+    // summing a windowed list would silently understate a long-standing balance.
+    var mbal = (await sb.from("parent_meal_balance_v")
+      .select("balance, last_topup_on").eq("student_id", sid).maybeSingle()).data;
+    var mrows = (await sb.from("parent_meal_v")
+      .select("occurred_on, kind, amount, vendor")
+      .eq("student_id", sid)
+      .order("occurred_on", { ascending: false }).limit(12)).data || [];
+    renderMeal(mbal, mrows);
+
     // snapshots (persisted by the monthly clock / grading recompute)
     var snaps = (await sb.from("readiness_snapshots")
       .select("snapshot_date, readiness, pct_mastered, pct_weak, pct_untested")
@@ -544,6 +572,35 @@
       html += '<div class="warn">部分班別的本期費用尚未公告，上列金額並非全部應繳項目，請以櫃檯結算為準。</div>';
     }
     html += '<p class="payhint">繳費或對帳請洽櫃檯；本頁僅顯示金額，不提供收據查詢。</p>';
+    el.innerHTML = html;
+  }
+
+  function renderMeal(bal, rows) {
+    var el = $("meal");
+    // No ledger at all → say so; never render NT$0, which reads as "paid up".
+    if (!bal && !rows.length) {
+      el.innerHTML = '<p class="empty">尚未有餐費紀錄。</p>' +
+        '<p class="mlNote">預繳請洽櫃檯。</p>';
+      return;
+    }
+    var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
+    var b = bal ? Number(bal.balance) : 0;
+    var low = b < 500;
+    var html = '<div class="mlTop"><span class="lab">目前餘額</span>' +
+      '<span class="bal num' + (low ? " low" : "") + '">' + money(b) + "</span></div>";
+    // A negative balance is not an error state — the child ate, and this is the
+    // honest reading. Say 欠款 rather than showing a minus sign to interpret.
+    if (b < 0) html += '<div class="mlChip">已欠款，請儘快補繳</div>';
+    else if (low) html += '<div class="mlChip">餘額偏低，請補繳</div>';
+
+    html += rows.map(function (r) {
+      var isTop = r.kind === "topup";
+      return '<div class="mlR"><span class="dt num">' + esc((r.occurred_on || "").slice(5).replace("-", "/")) +
+        "　" + (isTop ? "預繳" : "便當" + (r.vendor ? "（" + esc(r.vendor) + "）" : "")) + "</span>" +
+        '<span class="v num' + (isTop ? " plus" : "") + '">' +
+        (isTop ? "+" : "−") + money(r.amount) + "</span></div>";
+    }).join("");
+    html += '<p class="mlNote">餘額低於 NT$500 會在這裡提醒；預繳請洽櫃檯。</p>';
     el.innerHTML = html;
   }
 
