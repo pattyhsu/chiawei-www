@@ -9,7 +9,7 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 |---|---|
 | `index.html` | 官網首頁 (brand v4 版型 + live 開課資訊) |
 | `elementary/junior/senior.html` | 年段頁 (國小/國中/高中) |
-| `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → 課程/作業 · 未繳學費 · 學習進度) |
+| `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → 提醒 · 課程/作業 · 課表 · 未繳學費 · 餐費 · 學習進度) |
 | `offerings.js` | renders 開課資訊 from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com) |
 | `legal/privacy-v1.html` | 個資法 告知/同意文 (versioned; new version = NEW file) |
 | `robots.txt` / `sitemap.xml` | 官網 indexable |
@@ -25,7 +25,8 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 
 Removed 2026-08-13 ("build it later if needed"), restored when Patty said to
 start the LIFF. The page + nav/footer links + the `/parent/` robots disallow +
-the 產生家長綁定碼 button in `chiawei-admin/roster.html` are all back. (The admin
+the 產生家長綁定碼 button are all back — the button now lives in `chiawei-admin/student.html`
+(學生總覽), since 名冊 was split into 班級 + 學生總覽 on 2026-08-18. (The admin
 half **was** pushed — a button only the owner sees, minting codes nobody can yet
 redeem, carries no public surface.)
 
@@ -60,28 +61,41 @@ before a single parent can log in, and neither is set yet.
    > (`privacy-v1.html` stays on disk, still footer-linked from the four public pages as
    > the site-wide 告知 covering the 預約表單.)
 
-### What the portal shows (v2, 2026-08-16)
+### What the portal shows (v2, 2026-08-16/17)
 
-Three sections, in the order a parent actually uses them:
+Six sections, in the order a parent actually uses them:
 
-1. **課程與作業** — the授課老師's 進度 + 作業 for the child's classes, newest first,
-   today's pinned and badged. From `parent_journal_v`.
-2. **本期學費** — 應繳 / 已繳 / 未繳 per class + a total. From `parent_tuition_v`.
+0. **老師提醒** — pinned above everything, auto-expiring (default 7 days). For a
+   forward-looking class notice like 「本週六加課」. From `parent_notice_v`.
+1. **課程與作業** — the授課老師's 進度 + 作業, newest first, today's pinned and
+   badged. From `parent_journal_v`.
+2. **每週課表** — the child's own meetings, day rows not a 6-column grid (a child
+   takes 2–5 classes; a full grid is mostly blank). From `parent_schedule_v`.
+   ⚠️ Synced from `chiawei-admin/schedule.data.js` — **re-run
+   `scripts/sync_schedule.py --apply` after every timetable edit** or parents read
+   stale times.
+3. **本期學費** — 應繳 / 已繳 / 未繳 per class + a total. From `parent_tuition_v`.
    **未繳金額 only** — no receipt numbers, no payment methods, no 線上繳費. That
    half of PRD §11 E-4 stays cut; E-5 reversed only the balance.
-3. **學習進度** — the 覆蓋度 dial, unit statuses, exam history (unchanged).
+4. **餐費餘額** — prepaid balance + recent draw-downs. From `parent_meal_balance_v`
+   (summed over ALL history) + `parent_meal_v` (60-day detail). May be negative —
+   the child ate, so it says 已欠款 rather than a minus sign to interpret.
+5. **學習進度** — the 覆蓋度 dial, unit statuses, exam history (unchanged).
 
-Both new surfaces are **security-definer views** filtered by `is_self_or_parent()`,
-not row policies — because PostgREST lets the client pick columns, so a policy on
+All of these are **security-definer views** filtered by `is_self_or_parent()`, not
+row policies — because PostgREST lets the client pick columns, so a policy on
 `teacher_journals` would let a parent `select=*` and read `notes`, the teacher's
-internal 班級狀況. A column that is not in the view cannot leak, and pgTAP 24 pins
-that with `hasnt_column`. **Never add `notes`/`teacher_id` to `parent_journal_v`,
-or `receipt_no`/`method`/`paid_on` to `parent_tuition_v`.**
+internal 班級狀況. A column that is not in the view cannot leak, and pgTAP 24/25/26/27
+pin that with `hasnt_column`. **Never add `notes`/`teacher_id` to `parent_journal_v`
+or `parent_schedule_v`, `receipt_no`/`method`/`paid_on` to `parent_tuition_v`, or
+`recorded_by` to `parent_meal_v`.** `student_notes` (學生備註) is **not** in this list
+and must never be: it is owner/主任-only free text about a named minor.
 
 ### ⚠️ Build now, invite later — every section is empty today
 
-`terms`, `class_fees`, `teacher_journals` and `readiness_snapshots` are all at **0
-rows**. The portal is a display layer over daily staff habits, and those habits have
+`terms`, `class_fees`, `teacher_journals`, `meal_ledger` (real students) and
+`readiness_snapshots` are all at **0 rows**. `class_meetings` is the exception — 40
+rows are synced, so 每週課表 works on day one. The portal is a display layer over daily staff habits, and those habits have
 not started (the 115 term opens 8/24). **Hand out 綁定碼 only after** the 收費台 has a
 term + class fees entered, and teachers have kept 老師日誌 for ~2 weeks. A page that
 says 「尚無資料」 in all three sections costs more trust than not having one.
