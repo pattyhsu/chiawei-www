@@ -11,55 +11,103 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 | `elementary/junior/senior.html` | 年段頁 (國小/國中/高中) |
 | `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → 提醒 · 課程/作業 · 課表 · 未繳學費 · 餐費 · 學習進度) |
 | `offerings.js` | renders 開課資訊 from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com) |
-| `legal/privacy-v1.html` | 個資法 告知/同意文 (versioned; new version = NEW file) |
+| `legal/privacy-v1.html` | 個資法 告知/同意文 — site-wide 告知 covering the 預約表單 |
+| `legal/privacy-v2.html` | the version `parent_bind()` records; **a new version is a NEW FILE, never an edit** |
+| `parent/richmenu/` | LINE 圖文選單 artwork + its tap-area map (see that dir's README) |
 | `robots.txt` / `sitemap.xml` | 官網 indexable |
 
-## 家長專區 — restored 2026-08-16, COMMITTED BUT NOT PUSHED
+## 家長專區 — the LINE setup, as built 2026-08-18
 
-> **⚠️ THIS COMMIT IS DELIBERATELY UNPUSHED (Patty's call, 2026-08-16).** It is
-> sitting on `main` on Patty's Mac and is NOT on GitHub Pages. She chose to hold
-> it so no 家長專區 link appears in the live nav/footer until the LIFF actually
-> works. **`git push origin main` is the last step, after the LINE console work
-> below** — not before. If you are a later session and find an unpushed commit
-> here, this is why; don't "tidy" it away, and don't push it without asking.
+Removed 2026-08-13 ("build it later if needed"), restored 2026-08-16, and wired
+to a real LINE channel on 2026-08-18. The 產生家長綁定碼 button lives in
+`chiawei-admin/student.html` (學生總覽), since 名冊 was split into 班級 + 學生總覽.
 
-Removed 2026-08-13 ("build it later if needed"), restored when Patty said to
-start the LIFF. The page + nav/footer links + the `/parent/` robots disallow +
-the 產生家長綁定碼 button are all back — the button now lives in `chiawei-admin/student.html`
-(學生總覽), since 名冊 was split into 班級 + 學生總覽 on 2026-08-18. (The admin
-half **was** pushed — a button only the owner sees, minting codes nobody can yet
-redeem, carries no public surface.)
+### The LINE objects — do not create a second one of any of these
 
-**It is deliberately safe to have live right now.** `LIFF_ID` is still `""`, and
-the page's first branch on that is `show("st-notopen")` — every visitor sees
-「家長專區尚未開通」 and nothing touches Supabase. The Edge Function is the second
-lock: `parent-login` 503s without `LINE_LOGIN_CHANNEL_ID`. Both must be set
-before a single parent can log in, and neither is set yet.
+| Thing | Value |
+|---|---|
+| Provider | **家偉補習班** |
+| Messaging API channel | 家偉補習班 (@chiawei) — linked to that provider **permanently** |
+| LINE Login channel | 家偉補習班家長專區 — **Channel ID `2011161502`** |
+| LIFF app | 家長專區 — **LIFF ID `2011161502-kGxpeEuI`**, size `Full` |
+| LIFF scopes | `openid` + `profile` only (**never `email`** — needless PII) |
+| LIFF endpoint | `https://www.chiaweiedu.com/parent/` |
+| Add friend option | `On (Normal)` — offered, not pre-ticked |
 
-**Two owner steps remain, and the FIRST ONE IS IRREVERSIBLE:**
+**The same-provider requirement is SATISFIED and that is the whole ballgame.**
+LINE user IDs are scoped per provider — *"if the provider is the same, the user
+ID is the same regardless of the channel type"* — so the `sub` this page captures
+equals the Messaging-API `userId` that Phase 2 per-class push needs. It was got
+right by doing the **irreversible** step first: the OA was linked to the provider
+from **OA Manager → 設定 → Messaging API → 啟用**, which LINE warns *"you won't be
+able to change or unlink this provider once linked"*, and only then was the Login
+channel created **inside that provider's own page**.
 
-1. **LINE console — the same-provider trap.** The LINE **Login channel must be
-   created under the SAME provider as the school's Official Account** (`@chiawei`).
-   If it isn't, the `sub` this page captures will never equal the Messaging-API
-   `userId` that Phase 2 push notifications need — and the only fix is re-binding
-   every family by hand. Verify the provider **before** the first parent binds,
-   not after. Then create a LIFF app (endpoint `https://www.chiaweiedu.com/parent/`,
-   size `Full`, scopes `profile` + `openid`) and set:
-   - `LIFF_ID` → `parent/index.html` (line ~182)
-   - `supabase secrets set LINE_LOGIN_CHANNEL_ID=<channel id> --project-ref fngddvxroiokqmpxdwwu`
-2. **同意文 sign-off — `legal/privacy-v2.html`** (new file, 2026-08-16). The page now
-   binds against `privacy-v2`, which discloses the two categories v2 added (學費金額,
-   課堂/作業紀錄) and restores the LINE-binding sections the 08-13 rewrite dropped.
-   It is **drafted by Claude and not lawyer-reviewed** — Patty must sign it off before
-   the first real parent binds.
-   > **🔑 A new consent version is a NEW FILE, never an edit.** `parent_bind()` stores
-   > the version string in `parent_consents` as the legal basis, so the text a family
-   > agreed to must stay recoverable verbatim. `privacy-v1.html` *was* edited in place
-   > on 08-13 while `CONSENT_VERSION` still read `privacy-v1`; that was harmless only
-   > because the table was empty. After the first bind, editing the file a family's row
-   > points at silently rewrites what they consented to — add `privacy-v3.html` instead.
-   > (`privacy-v1.html` stays on disk, still footer-linked from the four public pages as
-   > the site-wide 告知 covering the 預約表單.)
+> ⚠️ **You should never see a "Create a new provider" screen again.** Everything
+> LINE-side gets created from inside the 家偉補習班 provider. A Login channel in a
+> second provider silently breaks the userId match, and the only fix is re-binding
+> every family by hand.
+
+### The two locks — both now OPEN
+
+1. `LIFF_ID` in `parent/index.html` (~line 279). Empty → `show("st-notopen")`
+   before any Supabase call.
+2. `LINE_LOGIN_CHANNEL_ID` as a Supabase secret. Unset → `parent-login` 503s
+   `not_configured`.
+   ```bash
+   supabase secrets set LINE_LOGIN_CHANNEL_ID=2011161502 --project-ref fngddvxroiokqmpxdwwu
+   ```
+   No function redeploy needed — the secret is read at runtime. Verify live by
+   POSTing a junk token: **401 `bad_token`** = configured, **503 `not_configured`**
+   = not.
+
+### Gates still standing before a real family binds
+
+- **The Login channel is in `Developing` status.** Only accounts with a role on
+  the channel (i.e. Patty as Admin) can log in — which is what makes the ZZ 測試班
+  pilot naturally private. **Switch it to `Published` before handing a 綁定碼 to
+  any real family**, or their login fails in a way that looks like anything but
+  the real cause.
+- **Set the Privacy policy URL in BOTH LINE places** once the push has made
+  `privacy-v2.html` reachable (it was 404 while unpushed, which is why both were
+  left blank at creation): the provider-level dialog (OA Manager → Messaging API)
+  and the Login channel's Basic settings →
+  `https://www.chiaweiedu.com/legal/privacy-v2.html`. Terms of use stays blank —
+  the school has none and one must not be invented.
+- **Require two-factor authentication is left ON** (LINE's default). The docs say
+  *"the behavior of LINE Login authorization requests within the LIFF browser is
+  not guaranteed"*, so whether a parent actually sees a 2FA prompt is an open
+  question the pilot answers. It is a toggle, not a one-way door — if it is
+  friction, turn it off; nothing needs re-binding.
+
+### 同意文 — `legal/privacy-v2.html`, signed off by Patty 2026-08-18
+
+The page binds against `privacy-v2`, which discloses the two categories v2 added
+(學費金額, 課堂/作業紀錄) and restores the LINE-binding sections the 08-13 rewrite
+dropped. Drafted by Claude, not lawyer-reviewed; Patty accepted it on that basis.
+
+> **🔑 A new consent version is a NEW FILE, never an edit.** `parent_bind()` stores
+> the version string in `parent_consents` as the legal basis, so the text a family
+> agreed to must stay recoverable verbatim. `privacy-v1.html` *was* edited in place
+> on 08-13 while `CONSENT_VERSION` still read `privacy-v1`; that was harmless only
+> because the table was empty. After the first bind, editing the file a family's row
+> points at silently rewrites what they consented to — add `privacy-v3.html` instead.
+> (`privacy-v1.html` stays on disk, still footer-linked from the four public pages as
+> the site-wide 告知 covering the 預約表單.)
+
+### The push order — why it is split in two
+
+The original plan had the pilot before the push. **That cannot work**: LIFF loads
+`https://www.chiaweiedu.com/parent/`, which is 404 until the push. What Patty
+actually held back on 08-16 was not the page but *advertising* it — a 家長專區
+link in the live nav pointing at something unproven. So:
+
+1. `hold the 家長專區 nav link until the pilot passes` — reverts only the nav +
+   footer links on the four public pages. Push. `/parent/` is reachable, nothing
+   on the site points at it, and a stranger who guesses the URL meets the 綁定碼
+   screen and a code only the owner can mint (10/h, audited).
+2. Pilot against ZZ 測試班 (示範甲…己, `117-1191`–`1196`).
+3. **`git revert` that hold commit and push. That revert is the launch.**
 
 ### What the portal shows (v2, 2026-08-16/17)
 
@@ -128,8 +176,6 @@ below is the only record of what still needs real data:
 4. **Seasonal banner** (`#summer` on index) — swapped to 新學期 on 2026-08-13 and
    left date-free; it needs the real 開課日 whenever the 檔期 is fixed.
 5. GA4 measurement id (not added yet — add the snippet to all four pages).
-3. 同意文 (`legal/privacy-v1.html`) needs owner sign-off before the first real
-   parent binds.
 
 ## DNS — Cloudflare since 2026-08-13 (reversal; read the why)
 
