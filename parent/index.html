@@ -38,6 +38,7 @@
   .top-in .who{margin-left:auto;font-size:.78rem;color:var(--muted);text-align:right}
   .top-in .who a{color:var(--brand);text-decoration:none;font-weight:700}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  [data-sec]{scroll-margin-top:14px}
   h2{font-size:.95rem;font-weight:800;letter-spacing:.02em;margin-bottom:10px;padding-left:9px;border-left:3px solid var(--brand)}
   .state{max-width:640px;margin:48px auto;padding:0 16px;text-align:center;color:var(--muted)}
   .state b{display:block;font-size:1.05rem;color:var(--ink);margin-bottom:6px}
@@ -219,27 +220,27 @@
   <!-- 課程與作業 sits FIRST: it is the thing a parent opens this page for on a
        normal weekday. 學費 follows (a monthly nudge, not a daily one), then the
        progress report, which is the deepest but least frequently read. -->
-  <div class="card">
+  <div class="card" data-sec="hw">
     <h2>課程與作業</h2>
     <div id="journal"></div>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="week">
     <h2>每週課表</h2>
     <div id="week"></div>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="fee">
     <h2>本期學費</h2>
     <div id="fee"></div>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="meal">
     <h2>餐費餘額</h2>
     <div id="meal"></div>
   </div>
 
-  <div class="card">
+  <div class="card" data-sec="progress">
     <h2>會考考點覆蓋度 · 數學</h2>
     <div id="rd"></div>
     <p class="disclaim">此為考點覆蓋度，非成績預測
@@ -289,6 +290,49 @@
   var current = null; // active student id
 
   var DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+  // ── section deep-link (圖文選單) ───────────────────────────────────────────
+  // Every rich-menu button opens THIS page, so without an anchor all five land
+  // at the top and the menu reads as broken. Keys are stable ids in the URL —
+  // renaming one silently breaks a button already sitting in parents' LINE.
+  var SECTIONS = { hw: 1, week: 1, fee: 1, meal: 1, progress: 1 };
+
+  /** Which section the URL asks for, or null.
+   *  Read from BOTH `?s=<key>` and `#<key>`: a query string is what LIFF
+   *  documents as surviving a LIFF-URL suffix, a fragment is what works in a
+   *  plain browser, and the rich menu is cheaper to get right once than to
+   *  re-upload. Before liff.init() rewrites the URL, LINE hands the original
+   *  suffix back as `?liff.state=<encoded>`, so decode that first — this runs
+   *  on both sides of init and must agree. */
+  function wantedSection() {
+    var raw = location.search + location.hash;
+    var st = raw.match(/liff\.state=([^&#]*)/);
+    if (st) { try { raw = decodeURIComponent(st[1]); } catch (e) {} }
+    var m = raw.match(/(?:[?&]s=|#)([a-z]+)/);
+    return m && SECTIONS[m[1]] ? m[1] : null;
+  }
+
+  // Captured at load, because the DEV branch below strips the URL. ONE-SHOT:
+  // consumed on first use, so switching child tabs doesn't yank the parent
+  // back to where they entered.
+  var pendingSection = wantedSection();
+
+  function gotoSection() {
+    var key = pendingSection;
+    pendingSection = null;
+    if (!key) return;
+    // Drop a section fragment FIRST. `week`/`fee`/`meal` are also the ids of the
+    // content divs inside those cards, so the browser's own fragment jump keeps
+    // firing as content lands and wins the race against this scroll — parking
+    // the parent ~70px low, with the 標題 pushed off the top. Safe here: this
+    // runs long after liff.init() resolved, and replaceState throws under
+    // file://, which is how a page in this project once aborted a whole load.
+    if (/^#[a-z]+$/.test(location.hash)) {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    }
+    var el = document.querySelector('[data-sec="' + key + '"]');
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function $(id) { return document.getElementById(id); }
   function show(id) {
@@ -718,6 +762,7 @@
       try {
         await liff.init({ liffId: LIFF_ID });
       } catch (e) { oops("LINE 登入初始化失敗。"); return; }
+      if (!pendingSection) pendingSection = wantedSection();
       if (!(await ensureSession())) return;
     }
     $("who").innerHTML = '<a href="#" id="signout">登出</a>';
@@ -731,7 +776,10 @@
     current = kids[0].id;
     renderTabs();
     show("st-report");
-    loadChild(current);
+    // awaited: a card's height is not final until its data lands, so scrolling
+    // before this resolves aims at the wrong offset.
+    await loadChild(current);
+    gotoSection();
   }
 
   boot();
