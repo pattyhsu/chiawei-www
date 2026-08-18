@@ -759,9 +759,22 @@
       }
     } else {
       if (!LIFF_ID) { show("st-notopen"); return; }
+      // Two failures used to print one message, which is unrecoverable for a
+      // parent AND for whoever they phone. Separate them: the SDK failing to
+      // load at all (blocked by a content blocker, or opened outside LINE where
+      // static.line.me didn't come back) is a different problem from LINE
+      // rejecting the init, and only the second is ours.
+      if (typeof liff === "undefined") {
+        oops("無法載入 LINE 元件。請從 LINE 聊天室的連結開啟本頁；若您有廣告攔截或隱私保護功能，請暫時關閉後再試。");
+        return;
+      }
       try {
         await liff.init({ liffId: LIFF_ID });
-      } catch (e) { oops("LINE 登入初始化失敗。"); return; }
+      } catch (e) {
+        var d = (e && (e.code || e.message)) ? String(e.code || e.message) : "unknown";
+        oops("LINE 登入初始化失敗（" + esc(d) + "）。請從 LINE 聊天室的連結開啟本頁。");
+        return;
+      }
       if (!pendingSection) pendingSection = wantedSection();
       if (!(await ensureSession())) return;
     }
