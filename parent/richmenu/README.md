@@ -64,7 +64,22 @@ The page reads `?s=<key>` **and** `#<key>`, because LIFF packs the whole suffix
 resolves. `?s=` is the form used here; the hash form exists so a plain browser
 link works too.
 
-## Building it in LINE Official Account Manager
+## What is live right now
+
+Published through the Messaging API on 2026-08-18 (OA Manager cannot express a
+5-column bar — its compact templates cap at 3):
+
+```
+→ DEFAULT  richmenu-e5c96f190d6050b43f723823acbfd0bb  2500×843  家長專區  [5 areas]
+```
+
+**LINE's API and OA Manager do not see each other's rich menus in EITHER
+direction** — the console warns about one half, but `--list` also returned "(no
+rich menus)" while the console was showing a 家長專區 menu as current. So there
+is no single screen showing the truth: `node deploy.mjs --list` is the API side,
+the console is its own side, and only one of them should ever hold a menu.
+
+## The old OA Manager path (superseded — kept for context)
 
 1. **主頁 → 圖文選單 → 建立**
 2. 標題 `家長專區`（internal only）· 使用期間 start today, **no end date**

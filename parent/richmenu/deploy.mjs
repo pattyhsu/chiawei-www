@@ -62,9 +62,13 @@ const MENU = {
   })),
 };
 
-async function api(url, init) {
+async function api(url, init, { tolerate404 = false } = {}) {
   const r = await fetch(url, init);
   const body = await r.text();
+  // NOTE: this exits the process rather than throwing, so callers cannot
+  // recover with try/catch — pass tolerate404 for states that are legitimately
+  // "not there yet", such as no default rich menu having been set.
+  if (r.status === 404 && tolerate404) return null;
   if (!r.ok) { console.error(`${r.status} ${url}\n${body}`); process.exit(1); }
   return body ? JSON.parse(body) : {};
 }
@@ -73,8 +77,8 @@ const arg = process.argv[2];
 
 if (arg === "--list") {
   const { richmenus } = await api("https://api.line.me/v2/bot/richmenu/list", { headers: H });
-  let def = null;
-  try { def = (await api("https://api.line.me/v2/bot/user/all/richmenu", { headers: H })).richMenuId; } catch {}
+  const d = await api("https://api.line.me/v2/bot/user/all/richmenu", { headers: H }, { tolerate404: true });
+  const def = d?.richMenuId ?? null;
   if (!richmenus?.length) console.log("(no rich menus)");
   for (const m of richmenus ?? []) {
     console.log(`${m.richMenuId === def ? "→ DEFAULT" : "         "}  ${m.richMenuId}  ${m.size.width}×${m.size.height}  ${m.name}  [${m.areas.length} areas]`);
