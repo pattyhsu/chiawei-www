@@ -270,7 +270,13 @@
   </div>
 </div>
 
-<script src="https://static.line.me/liff/edge/2/sdk.js"></script>
+<!-- LIFF SDK. The host is static.line-SCDN.net — `static.line.me` was the
+     documented host when this page was written and has since stopped
+     resolving ENTIRELY (no DNS record at 8.8.8.8 or 1.1.1.1), which broke
+     the very first real LIFF login: `liff` was undefined and the page could
+     only say "初始化失敗". If that recurs, the 無法載入 LINE 元件 branch in
+     boot() is the tell — check this URL first. charset per LINE's docs. -->
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../offerings.js" defer></script>
 <script>
