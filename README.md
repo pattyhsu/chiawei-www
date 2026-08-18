@@ -29,9 +29,10 @@ to a real LINE channel on 2026-08-18. The 產生家長綁定碼 button lives in
 | Provider | **家偉補習班** |
 | Messaging API channel | 家偉補習班 (@chiawei) — linked to that provider **permanently** |
 | LINE Login channel | 家偉補習班家長專區 — **Channel ID `2011161502`** |
-| LIFF app | 家長專區 — **LIFF ID `2011161502-kGxpeEuI`**, size `Full` |
+| LIFF app | 家長專區 — **LIFF ID `2011161502-kGxpeEuI`**, size **`Tall`** |
 | LIFF scopes | `openid` + `profile` only (**never `email`** — needless PII) |
 | LIFF endpoint | `https://www.chiaweiedu.com/parent/` |
+| LIFF size | **`Tall`** (~80% of screen), NOT `Full`. Patty's call 2026-08-18, against 木生婦幼's: a full-screen takeover to check one homework line reads as heavier than the errand. `Compact` (~50%) was the alternative, judged too short for a six-section scrolling report. |
 | Add friend option | `On (Normal)` — offered, not pre-ticked |
 
 **The same-provider requirement is SATISFIED and that is the whole ballgame.**
