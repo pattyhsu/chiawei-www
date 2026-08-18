@@ -19,23 +19,37 @@ button to "fill the grid".
 ## Tap-area map — this and the artwork are ONE thing
 
 LINE renders a rich menu as a flat image with invisible tap areas mapped over
-it. The image below and this table must move together; a box edited in
+it. The image and this table must move together; a column edited in
 `richmenu.html` without the matching row here produces a menu whose buttons are
 silently off-target.
 
-Layout is the stock **大型 (Large) 2500×1686, 3×2 六格** template, so it can be
-built entirely in **LINE Official Account Manager** with no Messaging API call.
-**今日作業 spans the top two cells visually, and BOTH of those cells get the same
-link** — that is what makes it double-width without a custom area map.
+**Size is 小型 / Compact — 2500×843, five equal 500-wide columns.** The first cut
+was 大型 (2500×1686) with a double-width 今日作業 block; Patty rejected it on
+sight (2026-08-18) as "way too big and not useful", against 木生婦幼診所's bar as
+the reference. A rich menu is a tab bar, not a poster — it sits on top of the
+conversation, so height is taken from the thing the parent actually came for.
+**今日作業 keeps its emphasis through COLOUR, not area**, which is what let the
+layout drop to five equal columns without losing the daily-one hierarchy.
 
 | # | Cell (x, y, w, h) | Button | Link |
 |---|---|---|---|
-| 1 | 0, 0, 833, 843 | 今日作業 (left half) | `https://liff.line.me/<LIFF_ID>?s=hw` |
-| 2 | 833, 0, 833, 843 | 今日作業 (right half — **same link as #1**) | `https://liff.line.me/<LIFF_ID>?s=hw` |
-| 3 | 1666, 0, 834, 843 | 每週課表 | `https://liff.line.me/<LIFF_ID>?s=week` |
-| 4 | 0, 843, 833, 843 | 本期學費 | `https://liff.line.me/<LIFF_ID>?s=fee` |
-| 5 | 833, 843, 833, 843 | 餐費餘額 | `https://liff.line.me/<LIFF_ID>?s=meal` |
-| 6 | 1666, 843, 834, 843 | 學習進度 | `https://liff.line.me/<LIFF_ID>?s=progress` |
+| 1 | 0, 0, 500, 843 | 今日作業 | `https://liff.line.me/<LIFF_ID>?s=hw` |
+| 2 | 500, 0, 500, 843 | 每週課表 | `https://liff.line.me/<LIFF_ID>?s=week` |
+| 3 | 1000, 0, 500, 843 | 本期學費 | `https://liff.line.me/<LIFF_ID>?s=fee` |
+| 4 | 1500, 0, 500, 843 | 餐費餘額 | `https://liff.line.me/<LIFF_ID>?s=meal` |
+| 5 | 2000, 0, 500, 843 | 學習進度 | `https://liff.line.me/<LIFF_ID>?s=progress` |
+
+LIFF ID is `2011161502-kGxpeEuI`. Five buttons is the intended count (Patty):
+我要請假 / 聯絡櫃檯 / 常見問題 were removed and deliberately NOT replaced with
+filler — don't add a sixth to "fill the row".
+
+⚠️ **A 1×5 compact layout may not be among LINE Official Account Manager's stock
+templates.** If it isn't, the menu has to be created through the Messaging API
+(`POST /v2/bot/richmenu` + image upload + `setDefault`), which is available now
+that the OA is linked to the 家偉補習班 provider. Trade-off to accept knowingly:
+**a Messaging-API rich menu does not appear in OA Manager's Rich menus list**, so
+the console stops being the place you can see or edit it — this README becomes
+the only record.
 
 ### The `?s=` keys are a published contract
 

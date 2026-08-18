@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const W = 2500, H = 1686;               // LINE rich menu "large"; do not change
+const W = 2500, H = 843;   // LINE rich menu "compact"; do not change
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
