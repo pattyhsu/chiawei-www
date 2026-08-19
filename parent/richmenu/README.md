@@ -53,31 +53,20 @@ the only record.
 
 ### The `?s=` keys are a published contract
 
-`hw` · `week` · `fee` · `meal` · `progress` are matched against `SECTIONS` in
-`parent/index.html`, which scrolls to the card carrying the matching
-`data-sec="…"`. **Renaming a key breaks a button already sitting in parents'
-LINE**, where it cannot be recalled — add a new key and keep the old one
-resolving. An unknown or absent key is harmless: the page just opens at the top.
+`hw` · `week` · `fee` · `meal` · `progress` are matched against `VIEWS` in
+`parent/index.html`. **Each key opens its own SCREEN** — the page mounts only
+that view's cards, and fetches only that view's data (每週課表 is one query;
+the old single-page version fired twelve whichever button was tapped).
+
+**A key may be ADDED but never RENAMED.** A menu already sitting in a parent's
+LINE cannot be recalled, so a renamed key breaks a live button. *Which* cards a
+key mounts is free to change; the key itself is not. An unknown or absent key
+falls back to `hw`, which doubles as the home view — never a blank screen.
 
 The page reads `?s=<key>` **and** `#<key>`, because LIFF packs the whole suffix
 (query *and* fragment) into `liff.state` and hands it back before `liff.init()`
-resolves. `?s=` is the form used here; the hash form exists so a plain browser
-link works too.
-
-## What is live right now
-
-Published through the Messaging API on 2026-08-18 (OA Manager cannot express a
-5-column bar — its compact templates cap at 3):
-
-```
-→ DEFAULT  richmenu-e5c96f190d6050b43f723823acbfd0bb  2500×843  家長專區  [5 areas]
-```
-
-**LINE's API and OA Manager do not see each other's rich menus in EITHER
-direction** — the console warns about one half, but `--list` also returned "(no
-rich menus)" while the console was showing a 家長專區 menu as current. So there
-is no single screen showing the truth: `node deploy.mjs --list` is the API side,
-the console is its own side, and only one of them should ever hold a menu.
+resolves. `?s=` is the form the menu uses — LINE rejects a fragment in the LIFF
+**endpoint** URL.
 
 ## The old OA Manager path (superseded — kept for context)
 

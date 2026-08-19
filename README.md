@@ -112,7 +112,10 @@ link in the live nav pointing at something unproven. So:
 
 ### What the portal shows (v2, 2026-08-16/17)
 
-Six sections, in the order a parent actually uses them:
+**Since 2026-08-19 these are five SEPARATE SCREENS, one per 圖文選單 button** —
+not one scrolling page. `?s=hw` doubles as home (there is no 首頁 button) and
+carries a **重點摘要** strip: 今天有作業 / 未繳 / 餐費, each chip **omitted when its
+data is absent, never zeroed**. Below is what each screen shows.
 
 0. **老師提醒** — pinned above everything, auto-expiring (default 7 days). For a
    forward-looking class notice like 「本週六加課」. From `parent_notice_v`.
