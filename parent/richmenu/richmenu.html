@@ -7,12 +7,17 @@
   COMPACT, not large (Patty, 2026-08-18, after seeing 木生婦幼's): the first cut
   was 2500×1686 with a double-width 今日作業 block, and it read as "way too big
   and not useful" — a full-height panel covering the chat to say five words. A
-  rich menu is a tab bar, not a poster. Five equal 500×843 columns, icon over
-  label, the way every app's bottom bar does it.
+  rich menu is a tab bar, not a poster. Six equal 416×843 columns, icon over label.
 
-  今日作業 carries the brand blue and the others are muted, so the daily one
-  still reads first WITHOUT spending twice the area on it — that was the real
-  job the double-width block was doing.
+  SIX, not five (Patty, 2026-08-19, after 木生's 首頁): the labels dropped from
+  four characters to TWO, and that — not a smaller face — is what bought the
+  room. 木生 fits five because 掛號/報告/意見/我的 are two chars; ours were four.
+  The long names survive as the card HEADINGS inside each screen, which is how a
+  tab bar normally works: the tab names the destination, the screen names itself.
+
+  首頁 carries the brand blue. It exists because 今日作業 had been doing two
+  jobs — it was secretly the home screen, so its label lied, and there was no way
+  back to the overview from 餐費餘額 except tapping something that says homework.
 
   Rendered to richmenu.png by build.mjs. The tap areas in README.md are the
   other half of this file: move a column here and the map is wrong.
@@ -26,7 +31,7 @@
   }
   .menu{
     width:2500px;height:843px;
-    display:grid;grid-template-columns:repeat(5,1fr);
+    display:grid;grid-template-columns:repeat(6,1fr);
     /* NO vertical dividers — the reference bar (木生婦幼) has none, and at this
        size they read as clutter. One hairline across the top is all that is
        needed for the bar to sit apart from the conversation. */
@@ -39,7 +44,7 @@
     gap:40px;
   }
   .cell svg{width:196px;height:196px;display:block}
-  .cell .lbl{font-size:94px;font-weight:800;letter-spacing:.03em;line-height:1;color:#6B7280}
+  .cell .lbl{font-size:92px;font-weight:800;letter-spacing:.03em;line-height:1;color:#6B7280}
   /* the daily one — colour is the whole emphasis budget now */
   .on .lbl{color:#2547C7;font-weight:900}
 </style>
@@ -49,11 +54,21 @@
   <div class="cell on">
     <svg viewBox="0 0 24 24" fill="none" stroke="#2547C7" stroke-width="1.7"
          stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.4 10.4 12 3.4l8.6 7"/>
+      <path d="M5.4 12v8.4h13.2V12"/>
+      <path d="M9.8 20.4v-5.2h4.4v5.2"/>
+    </svg>
+    <div class="lbl">首頁</div>
+  </div>
+
+  <div class="cell">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8A90A2" stroke-width="1.7"
+         stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 3.5h11.5a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H5z"/>
       <path d="M5 3.5a1.6 1.6 0 0 0 0 3.2h2.2"/>
       <path d="M8.6 12.2l2.4 2.4 4.6-5"/>
     </svg>
-    <div class="lbl">今日作業</div>
+    <div class="lbl">作業</div>
   </div>
 
   <div class="cell">
@@ -63,7 +78,7 @@
       <path d="M3 10h18M8 3v4M16 3v4"/>
       <path d="M7.4 14h3M7.4 17.6h3M13.6 14h3M13.6 17.6h3"/>
     </svg>
-    <div class="lbl">每週課表</div>
+    <div class="lbl">課表</div>
   </div>
 
   <div class="cell">
@@ -73,7 +88,7 @@
       <circle cx="12" cy="12" r="3.1"/>
       <path d="M5.9 9.4v5.2M18.1 9.4v5.2"/>
     </svg>
-    <div class="lbl">本期學費</div>
+    <div class="lbl">學費</div>
   </div>
 
   <div class="cell">
@@ -83,7 +98,7 @@
       <path d="M2.2 20.6h19.6"/>
       <path d="M9.6 8.9c-1-1.1 1-2.1 0-3.2M14.4 8.9c-1-1.1 1-2.1 0-3.2"/>
     </svg>
-    <div class="lbl">餐費餘額</div>
+    <div class="lbl">餐費</div>
   </div>
 
   <div class="cell">
@@ -92,7 +107,7 @@
       <path d="M3.4 20.4h17.2"/>
       <path d="M6.4 20.4v-5.8M11 20.4V9.6M15.6 20.4v-8.4M20.2 20.4V5.4"/>
     </svg>
-    <div class="lbl">學習進度</div>
+    <div class="lbl">進度</div>
   </div>
 
 </div>

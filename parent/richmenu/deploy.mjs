@@ -39,16 +39,20 @@ const TOKEN = token();
 const H = { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" };
 
 const LIFF = "2011161502-kGxpeEuI";
-const W = 500, HH = 843;                       // one column of the compact bar
+const COLS = 6, W = Math.floor(2500 / 6), HH = 843;   // 416px columns
 
 // Column order is the artwork's, left to right. Changing either without the
 // other silently mis-aims every button — see README.md's tap-area table.
+// Two-character labels are what let six columns breathe — 木生 fits five
+// because 掛號/報告/意見/我的 are two chars and ours were four. The long names
+// survive as the card HEADINGS inside each screen.
 const BUTTONS = [
-  ["今日作業", "hw"],
-  ["每週課表", "week"],
-  ["本期學費", "fee"],
-  ["餐費餘額", "meal"],
-  ["學習進度", "progress"],
+  ["首頁", "home"],
+  ["作業", "hw"],
+  ["課表", "week"],
+  ["學費", "fee"],
+  ["餐費", "meal"],
+  ["進度", "progress"],
 ];
 
 const MENU = {
@@ -57,7 +61,7 @@ const MENU = {
   name: "家長專區",                             // management-only
   chatBarText: "家長專區",                      // ≤14 chars, parents DO see this
   areas: BUTTONS.map(([label, key], i) => ({
-    bounds: { x: i * W, y: 0, width: W, height: HH },
+    bounds: { x: i * W, y: 0, width: i === BUTTONS.length - 1 ? 2500 - i * W : W, height: HH },
     action: { type: "uri", label, uri: `https://liff.line.me/${LIFF}?s=${key}` },
   })),
 };

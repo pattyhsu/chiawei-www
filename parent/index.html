@@ -340,9 +340,12 @@
   // parents' LINE, which cannot be recalled — a key may be ADDED but never
   // renamed. Which cards a key mounts is free to change; the key itself is not.
   var VIEWS = {
-    // 'hw' is also the HOME view: no 首頁 button exists (five is the intended
-    // count), and it is where a parent lands on a normal weekday.
-    hw:       ["summary", "notices", "sec-hw", "sec-offerings"],
+    // 首頁 exists because 'hw' had been doing two jobs — it was secretly home,
+    // so its label lied, and there was no way back to the overview from 餐費
+    // except tapping something that says homework. 'hw' KEPT its key (keys are
+    // additive, never renamed), it just carries less now.
+    home:     ["summary", "notices", "sec-offerings"],
+    hw:       ["sec-hw"],
     week:     ["sec-week"],
     fee:      ["sec-fee"],
     meal:     ["sec-meal"],
@@ -351,9 +354,9 @@
   var VIEW_IDS = ["summary", "notices", "sec-hw", "sec-week", "sec-fee", "sec-meal",
                   "sec-progress", "sec-trend", "sec-units", "sec-exams", "sec-offerings"];
 
-  /** Which view the URL asks for; 'hw' when it asks for nothing or for
-   *  something unknown — opening the LIFF directly lands on the same screen as
-   *  the daily button, so there is one home rather than two.
+  /** Which view the URL asks for; 'home' when it asks for nothing or for
+   *  something unknown — opening the LIFF directly lands on 首頁, the same
+   *  place the first menu button goes, so there is one home rather than two.
    *  Read from BOTH `?s=<key>` and `#<key>`: LIFF packs the whole suffix, query
    *  AND fragment, into `liff.state` and hands it back before liff.init()
    *  resolves, so decode that first — this must give the same answer on either
@@ -364,7 +367,7 @@
     var st = raw.match(/liff\.state=([^&#]*)/);
     if (st) { try { raw = decodeURIComponent(st[1]); } catch (e) {} }
     var m = raw.match(/(?:[?&]s=|#)([a-z]+)/);
-    return m && VIEWS[m[1]] ? m[1] : "hw";
+    return m && VIEWS[m[1]] ? m[1] : "home";
   }
 
   // Captured at load, because the DEV branch strips the URL before boot runs.
@@ -373,7 +376,7 @@
   /** Mount only this view's cards. Called BEFORE the fetch so a parent never
    *  sees a flash of the sections they didn't ask for. */
   function applyView() {
-    var keep = VIEWS[currentView] || VIEWS.hw;
+    var keep = VIEWS[currentView] || VIEWS.home;
     VIEW_IDS.forEach(function (id) {
       var el = $(id);
       if (el) el.classList.toggle("vhide", keep.indexOf(id) === -1);
@@ -484,17 +487,17 @@
   async function loadView(sid) {
     var v = currentView;
 
-    if (v === "hw") {
-      // The summary chips need 學費 and 餐費 numbers, so home costs ~5 queries.
+    if (v === "home") {
+      // The summary chips need 學費 and 餐費 numbers, so 首頁 costs ~5 queries.
+      // The journal is fetched only far enough back to find TODAY's entry — the
+      // full list belongs to the 作業 view.
       var r = await Promise.all([
         sb.from("parent_notice_v")
           .select("class_name, entry_date, show_until, notice")
           .eq("student_id", sid).order("entry_date", { ascending: false }),
-        // parent_journal_v is a definer view; the base table carries `notes`,
-        // the teacher's internal 班級狀況, which the view omits.
         sb.from("parent_journal_v")
-          .select("class_id, class_name, subject, entry_date, progress, homework")
-          .eq("student_id", sid).order("entry_date", { ascending: false }).limit(40),
+          .select("entry_date, homework")
+          .eq("student_id", sid).order("entry_date", { ascending: false }).limit(5),
         sb.from("parent_tuition_v")
           .select("class_id, class_name, term_name, expected, paid, outstanding")
           .eq("student_id", sid),
@@ -502,10 +505,19 @@
         sb.from("parent_meal_balance_v").select("balance, last_topup_on")
           .eq("student_id", sid).maybeSingle(),
       ]);
-      var ntc = r[0].data || [], jrn = r[1].data || [];
-      renderNotices(ntc);
+      renderNotices(r[0].data || []);
+      renderSummary(kidById(sid), r[1].data || [], r[2].data || [],
+                    (r[3].data || []).length, r[4].data);
+      return;
+    }
+
+    if (v === "hw") {
+      // parent_journal_v is a definer view; the base table carries `notes`, the
+      // teacher's internal 班級狀況, which the view omits.
+      var jrn = (await sb.from("parent_journal_v")
+        .select("class_id, class_name, subject, entry_date, progress, homework")
+        .eq("student_id", sid).order("entry_date", { ascending: false }).limit(40)).data || [];
       renderJournal(jrn);
-      renderSummary(kidById(sid), jrn, r[2].data || [], (r[3].data || []).length, r[4].data);
       return;
     }
 
