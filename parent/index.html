@@ -47,6 +47,12 @@
   .sumWho{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
   .sumWho b{font-size:1rem;font-weight:900;color:var(--blue-ink)}
   .sumWho span{font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
+  .sumToday{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px;
+    padding-bottom:10px;border-bottom:1px dashed var(--line)}
+  .sumToday .lab{font-size:.76rem;font-weight:800;color:var(--muted)}
+  .sumToday .t{font-size:.95rem;font-weight:900;color:var(--blue-ink);font-variant-numeric:tabular-nums}
+  .sumToday .n{font-size:.88rem;font-weight:700;color:#33384c}
+  .sumToday .off{font-size:.9rem;font-weight:700;color:var(--muted)}
   .sumChips{display:flex;flex-wrap:wrap;gap:7px}
   .chip{font-size:.82rem;font-weight:700;border-radius:999px;padding:5px 12px;background:#F1F3F8;color:#33384c;white-space:nowrap}
   .chip.hot{background:var(--blue-tint);color:var(--blue-deep)}
@@ -504,10 +510,14 @@
         sb.from("enrollments").select("class_id").eq("student_id", sid).eq("active", true),
         sb.from("parent_meal_balance_v").select("balance, last_topup_on")
           .eq("student_id", sid).maybeSingle(),
+        // the child's WHOLE week, not just today: "今天沒有課" is only an honest
+        // thing to say about a child who has a timetable at all (see renderSummary)
+        sb.from("parent_schedule_v").select("class_name, weekday, starts_at, ends_at")
+          .eq("student_id", sid).order("weekday").order("starts_at"),
       ]);
       renderNotices(r[0].data || []);
       renderSummary(kidById(sid), r[1].data || [], r[2].data || [],
-                    (r[3].data || []).length, r[4].data);
+                    (r[3].data || []).length, r[4].data, r[5].data || []);
       return;
     }
 
@@ -608,10 +618,31 @@
    *  instead of scrolling, so 「學費已繳清」 with no fee entered would be a false
    *  claim delivered with maximum confidence. Nothing known → no strip at all.
    *  Same family as the absent-≠-zero bug in grading. */
-  function renderSummary(kid, jrn, fee, enrolledCount, mbal) {
+  function renderSummary(kid, jrn, fee, enrolledCount, mbal, week) {
     var el = $("summary");
     var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
     var today = todayLocal(), chips = [];
+
+    // 今天上課時間 — the recurring half of the question 每週課表 answers once a
+    // term. 「今天沒有課」 is a CLAIM, so it is made only about a child who has a
+    // timetable at all; a child with no synced meetings gets no line, because
+    // "no rows" there means "we don't know", not "no class".
+    // Stored weekday is 1(一)…6(六) and getDay() is 0(Sun)…6(Sat), which agree
+    // for Mon–Sat; Sunday matches nothing, which is correct — there are no
+    // Sunday classes.
+    var todayW = new Date().getDay(), todayCls = [];
+    (week || []).forEach(function (r) { if (Number(r.weekday) === todayW) todayCls.push(r); });
+    var hhmm = function (t) { return String(t || "").slice(0, 5); };
+    var todayHtml = "";
+    if (todayCls.length) {
+      todayHtml = '<div class="sumToday"><span class="lab">今天</span>' +
+        todayCls.map(function (r) {
+          return '<span class="t">' + esc(hhmm(r.starts_at)) + "–" + esc(hhmm(r.ends_at)) +
+                 '</span><span class="n">' + esc(r.class_name || "") + "</span>";
+        }).join("") + "</div>";
+    } else if ((week || []).length) {
+      todayHtml = '<div class="sumToday"><span class="lab">今天</span><span class="off">沒有課</span></div>';
+    }
 
     // 作業 speaks only if the teacher wrote TODAY. No entry means "not filled
     // in yet", which is not the same as "no homework".
@@ -633,11 +664,12 @@
                : { cls: "", t: "餐費 " + money(b) });
     }
 
-    if (!chips.length) { el.innerHTML = ""; return; }
+    if (!chips.length && !todayHtml) { el.innerHTML = ""; return; }
     el.innerHTML = '<div class="sum"><div class="sumWho"><b>' + esc(kid.name || "") +
-      "</b><span>" + esc(kid.student_no || "") + '</span></div><div class="sumChips">' +
-      chips.map(function (c) { return '<span class="chip ' + c.cls + '">' + esc(c.t) + "</span>"; }).join("") +
-      "</div></div>";
+      "</b><span>" + esc(kid.student_no || "") + "</span></div>" + todayHtml +
+      (chips.length ? '<div class="sumChips">' +
+        chips.map(function (c) { return '<span class="chip ' + c.cls + '">' + esc(c.t) + "</span>"; }).join("") +
+        "</div>" : "") + "</div>";
   }
 
   function renderNotices(rows) {
