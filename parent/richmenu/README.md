@@ -33,11 +33,23 @@ layout drop to five equal columns without losing the daily-one hierarchy.
 
 | # | Cell (x, y, w, h) | Button | Link |
 |---|---|---|---|
-| 1 | 0, 0, 500, 843 | 今日作業 | `https://liff.line.me/<LIFF_ID>?s=hw` |
-| 2 | 500, 0, 500, 843 | 每週課表 | `https://liff.line.me/<LIFF_ID>?s=week` |
-| 3 | 1000, 0, 500, 843 | 本期學費 | `https://liff.line.me/<LIFF_ID>?s=fee` |
-| 4 | 1500, 0, 500, 843 | 餐費餘額 | `https://liff.line.me/<LIFF_ID>?s=meal` |
-| 5 | 2000, 0, 500, 843 | 學習進度 | `https://liff.line.me/<LIFF_ID>?s=progress` |
+| 1 | 0, 0, 416, 843 | 首頁 | `https://liff.line.me/<LIFF_ID>?s=home` |
+| 2 | 416, 0, 416, 843 | 作業 | `https://liff.line.me/<LIFF_ID>?s=hw` |
+| 3 | 832, 0, 416, 843 | 課表 | `https://liff.line.me/<LIFF_ID>?s=week` |
+| 4 | 1248, 0, 416, 843 | 學費 | `https://liff.line.me/<LIFF_ID>?s=fee` |
+| 5 | 1664, 0, 416, 843 | 餐費 | `https://liff.line.me/<LIFF_ID>?s=meal` |
+| 6 | 2080, 0, **420**, 843 | 進度 | `https://liff.line.me/<LIFF_ID>?s=progress` |
+
+The last column is 420 wide, not 416: it absorbs the 2500/6 rounding so the bar
+has no dead strip on its right edge. `deploy.mjs` computes that; don't hand-edit
+the widths here without matching it.
+
+**Six buttons, two-character labels — and the labels are the reason six fits.**
+木生婦幼 fits five comfortably because 掛號/報告/意見/我的 are two characters;
+ours were four, and a six-column render was visibly cramped until they were
+shortened. The full names survive as the card headings inside each screen.
+首頁 exists because the daily button had been doubling as home, so its label lied
+and there was no way back to the overview.
 
 LIFF ID is `2011161502-kGxpeEuI`. Five buttons is the intended count (Patty):
 我要請假 / 聯絡櫃檯 / 常見問題 were removed and deliberately NOT replaced with
