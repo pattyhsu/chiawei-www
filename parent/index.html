@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>家偉補習班</title>
+<!-- Link preview. WITHOUT these, LINE scrapes the page's raw text and picks up
+     the 家長專區尚未開通 block — which is hidden by CSS but still IN the markup —
+     so every link the office sent previewed as "not open yet". A hidden element
+     is invisible to a reader and perfectly visible to a scraper.
+     og:image must be an ABSOLUTE url and a raster file; og.png is generated from
+     og.build.html. ⚠️ LINE CACHES PREVIEWS per URL, so an already-sent message
+     keeps the old one — test with a fresh query string. -->
+<meta name="description" content="家偉補習班家長專區：查看孩子的當日作業、每週課表、餐費餘額與學習狀況。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="家偉補習班">
+<meta property="og:title" content="家偉補習班 家長專區">
+<meta property="og:description" content="查看孩子的當日作業、每週課表、餐費餘額與學習狀況。">
+<meta property="og:url" content="https://www.chiaweiedu.com/parent/">
+<meta property="og:image" content="https://www.chiaweiedu.com/parent/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <link rel="icon" type="image/svg+xml" href="../ant-logo.svg">
 <!--
   家長專區 — LIFF page (also works in a normal browser via LINE Login).
