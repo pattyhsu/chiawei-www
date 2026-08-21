@@ -394,6 +394,19 @@
     ["st-loading", "st-notopen", "st-error", "st-bind", "st-report"].forEach(function (s) {
       $(s).classList.toggle("hidden", s !== id);
     });
+    // The 家長專區 title + 登出 belong on 首頁 ONLY (Patty, 2026-08-19). On the
+    // other five screens the LIFF sheet already carries LINE's own chrome —
+    // the account name and a ✕ — so a second header is a banner repeated on
+    // every tap, eating the top of a viewport that is only ~80% of a phone.
+    // Logging out is a 首頁 errand, one tap on the menu bar away.
+    //
+    // This lives in show() and not applyView() because 綁定另一個孩子 reaches
+    // st-bind WITHOUT re-running applyView, and the bind screen — which is
+    // where a parent may need to sign out of the wrong LINE account — still
+    // needs its header. Every state change funnels through here; view changes
+    // do not exist in-page (each menu tap is a fresh load).
+    var hd = document.querySelector("header.top");
+    if (hd) hd.classList.toggle("vhide", id === "st-report" && currentView !== "home");
   }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
