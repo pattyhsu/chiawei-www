@@ -351,6 +351,14 @@
     // except tapping something that says homework. 'hw' KEPT its key (keys are
     // additive, never renamed), it just carries less now.
     home:     ["summary", "notices", "sec-offerings"],
+    // 'bind' is a STATE, not a card set — it shows st-bind instead of st-report,
+    // so its list is empty. It exists because the ＋綁定另一個孩子 button was
+    // removed: only 11 of 145 families have a second child, so a permanent
+    // control on every screen was furniture for the other 134. The office now
+    // sends this link WITH the code, which is one tap instead of an instruction.
+    // Without it there would be NO way for an already-bound parent to enter a
+    // second code — the code alone is useless with nowhere to type it.
+    bind:     [],
     hw:       ["sec-hw"],
     week:     ["sec-week"],
     fee:      ["sec-fee"],
@@ -400,11 +408,12 @@
     // every tap, eating the top of a viewport that is only ~80% of a phone.
     // Logging out is a 首頁 errand, one tap on the menu bar away.
     //
-    // This lives in show() and not applyView() because 綁定另一個孩子 reaches
-    // st-bind WITHOUT re-running applyView, and the bind screen — which is
-    // where a parent may need to sign out of the wrong LINE account — still
-    // needs its header. Every state change funnels through here; view changes
-    // do not exist in-page (each menu tap is a fresh load).
+    // This lives in show() and not applyView() because st-bind is reached
+    // WITHOUT applyView ever running — boot short-circuits to it for a
+    // first-time parent and for a ?s=bind link — and the bind screen, which is
+    // where a parent may discover they are signed in as the wrong LINE account,
+    // still needs its header. Every state change funnels through here; view
+    // changes do not exist in-page (each menu tap is a fresh load).
     var hd = document.querySelector("header.top");
     if (hd) hd.classList.toggle("vhide", id === "st-report" && currentView !== "home");
   }
@@ -465,7 +474,14 @@
       }
       await loadKids();
       renderTabs();
-      if (kids.length) { current = out.student_id || kids[0].id; show("st-report"); applyView(); loadView(current); }
+      if (kids.length) {
+        current = out.student_id || kids[0].id;
+        // 'bind' is not somewhere to land: applyView would fall back to home but
+        // loadView switches on the same value and would drop through to the 進度
+        // branch, fetching the wrong data for the screen being shown.
+        if (currentView === "bind") currentView = "home";
+        show("st-report"); applyView(); loadView(current);
+      }
     };
   }
 
@@ -482,6 +498,13 @@
   function renderTabs() {
     var t = $("tabs");
     t.innerHTML = "";
+    // ONE child → no row at all. The row only ever existed to hold
+    // ＋綁定另一個孩子; with that gone, a lone pill repeating the name the 首頁
+    // summary already prints two lines below is furniture. 134 of 145 families
+    // have exactly one child, so this removes a row for most of the school and
+    // keeps it for the 11 who actually switch between children.
+    t.classList.toggle("vhide", kids.length < 2);
+    if (kids.length < 2) return;
     kids.forEach(function (k) {
       var b = document.createElement("button");
       b.textContent = k.name;
@@ -489,11 +512,6 @@
       b.onclick = function () { current = k.id; renderTabs(); loadView(k.id); };
       t.appendChild(b);
     });
-    var add = document.createElement("button");
-    add.className = "add";
-    add.textContent = "＋ 綁定另一個孩子";
-    add.onclick = function () { show("st-bind"); };
-    t.appendChild(add);
   }
 
   /** Fetch ONLY what the mounted view shows. The previous version fired all
@@ -954,7 +972,9 @@
     };
     wireBind();
     await loadKids();
-    if (!kids.length) { show("st-bind"); return; }
+    // No children yet (first-time parent) OR the office sent a ?s=bind link to
+    // add another one. Same screen, same code entry.
+    if (!kids.length || currentView === "bind") { show("st-bind"); return; }
     current = kids[0].id;
     renderTabs();
     show("st-report");

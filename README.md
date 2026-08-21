@@ -62,6 +62,24 @@ channel created **inside that provider's own page**.
    POSTing a junk token: **401 `bad_token`** = configured, **503 `not_configured`**
    = not.
 
+### 綁定第二個孩子 — the office sends a LINK, not just a code
+
+There is no ＋綁定另一個孩子 button. Only **11 of 145 families** have more than one
+child enrolled, so a permanent control on every screen was furniture for the other
+134 — and the tab row it lived in is now hidden entirely for single-child families,
+since a lone pill repeating the name the 首頁 summary already prints is noise.
+
+To add a second child, 學生總覽 → 產生家長綁定碼, then send the parent **both**:
+
+```
+https://liff.line.me/2011161502-kGxpeEuI?s=bind
+```
+
+⚠️ **The code is useless without the link.** `?s=bind` is the ONLY way an
+already-bound parent can reach the code entry screen — the automatic route fires
+only for a parent with no children bound at all. If the key is ever removed,
+second children become unbindable with no visible symptom.
+
 ### Gates still standing before a real family binds
 
 - **The Login channel is in `Developing` status.** Only accounts with a role on
