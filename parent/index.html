@@ -52,13 +52,6 @@
   body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.75;-webkit-font-smoothing:antialiased;padding-bottom:48px}
   .num{font-variant-numeric:tabular-nums lining-nums}
   .wrap{max-width:640px;margin:0 auto;padding:0 16px}
-  header.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:16px}
-  .top-in b{color:var(--blue-ink)}
-  .top-in{max-width:640px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:10px}
-  .top-in img{height:32px}
-  .top-in b{font-size:1rem;font-weight:900}
-  .top-in .who{margin-left:auto;font-size:.78rem;color:var(--muted);text-align:right}
-  .top-in .who a{color:var(--brand);text-decoration:none;font-weight:700}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
   /* Only the tapped button's screen is mounted; everything else is hidden
      rather than unmounted, so a view switch never re-fetches what it has. */
@@ -280,14 +273,6 @@
 </head>
 <body>
 
-<header class="top vhide">
-  <div class="top-in">
-    <img src="../ant.png" alt="">
-    <b>家長專區</b>
-    <span class="who" id="who"></span>
-  </div>
-</header>
-
 <div class="state" id="st-loading">
   <div class="halo"><img src="../ant.png" alt="" width="410" height="520"></div>
   <div class="brandName">家偉補習班</div>
@@ -491,13 +476,15 @@
     // where a parent may discover they are signed in as the wrong LINE account,
     // still needs its header. Every state change funnels through here; view
     // changes do not exist in-page (each menu tap is a fresh load).
-    // Hidden by default in the markup, so the SPLASH stands alone: it already
-    // carries the ant and 家偉補習班, and a header saying 家長專區 directly above
-    // it was the same brand twice on a screen whose whole job is to say who this
-    // belongs to while the data loads (Patty, 2026-08-20).
-    var hd = document.querySelector("header.top");
-    if (hd) hd.classList.toggle("vhide",
-      id === "st-loading" || (id === "st-report" && currentView !== "home"));
+    // NO app header at all (Patty, 2026-08-20): the LIFF sheet already prints
+    // 家偉補習班 and the domain directly above, so ours was the same line twice
+    // — and 登出 was a permanent control for something a parent inside LINE will
+    // never do. Their LINE account IS their identity here; there is nothing to
+    // sign out of that signing out would fix.
+    // ⚠️ The one case it covered is now front-desk work, like everything else
+    // that needs an adult: a session belonging to the wrong LINE account (a
+    // shared or switched phone) is cleared by deactivating the family in
+    // 學生總覽, not by the parent.
   }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -1157,11 +1144,6 @@
       currentView = wantedView();   // liff.init() may have rewritten the URL
       if (!(await ensureSession())) return;
     }
-    $("who").innerHTML = '<a href="#" id="signout">登出</a>';
-    $("signout").onclick = function (ev) {
-      ev.preventDefault();
-      sb.auth.signOut().then(function () { try { liff.logout(); } catch (e) {} location.reload(); });
-    };
     wireBind();
     await loadKids();
     // No children yet (first-time parent) OR the office sent a ?s=bind link to
