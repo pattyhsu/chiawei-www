@@ -61,11 +61,14 @@
   }
 
   function render(el, rows) {
+    // 🔑 NO ROWS → THE WHOLE SECTION GOES, not an empty state. Same rule the
+    // 家長專區's 特別班 tile follows: 「今天沒有作業」 is information, but a
+    // permanent 「目前沒有特別班」 on a marketing page is a section that says
+    // nothing — and the school may go a whole year without one (Patty,
+    // 2026-08-20). It reappears by itself the moment a 特別班 is 上架.
     if (!rows.length) {
-      // Says what it IS, not what it lacks: 常態班 招生 never stops, so an empty
-      // 特別班 list is not "nothing on offer".
-      el.innerHTML =
-        '<p class="off-empty">目前沒有招生中的特別班——各年段常態班常年招生，歡迎加 LINE 詢問插班與試聽。</p>';
+      var sec = el.closest("section");
+      if (sec) sec.style.display = "none"; else el.innerHTML = "";
       return;
     }
     el.innerHTML = rows
