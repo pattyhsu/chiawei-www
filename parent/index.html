@@ -219,6 +219,20 @@
   tr:last-child td{border-bottom:0}
   .empty{color:var(--muted);font-size:.88rem}
 
+  /* 特別班 — separately-enrolled things a parent can MISS (AMC/AIME/出國班).
+     The heaviest line is the deadline, not the start date. */
+  .spR{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px}
+  .spR:last-child{margin-bottom:0}
+  .spH{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .spH b{font-size:.98rem;font-weight:900;color:var(--blue-ink)}
+  .spH .tg{font-size:.72rem;font-weight:800;background:var(--blue-tint);color:var(--blue-deep);
+    border-radius:999px;padding:2px 10px}
+  .spM{font-size:.86rem;color:#4A4237;margin-top:4px}
+  .spD{font-size:.86rem;font-weight:900;color:var(--orange);margin-top:5px}
+  .spD.past{color:var(--muted);font-weight:700}
+  .spN{font-size:.8rem;color:var(--muted);margin-top:3px}
+
   /* bind screen */
   .bind input[type=text]{width:100%;border:2px solid var(--line);border-radius:10px;padding:12px 14px;font-size:1.2rem;letter-spacing:.35em;text-transform:uppercase;font-family:var(--sans);text-align:center;margin:10px 0}
   .bind input[type=text]:focus{outline:none;border-color:var(--brand)}
@@ -226,14 +240,6 @@
   .bind label a{color:var(--brand);font-weight:700}
   .bind .err{color:var(--orange);font-size:.85rem;font-weight:700;margin-top:10px;min-height:1.4em}
 
-  /* offerings reuse (matches offerings.js markup) */
-  .off-row{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:12px 14px;margin-bottom:10px}
-  .off-main{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .off-main b{font-size:.95rem;font-weight:800}
-  .off-tag{font-size:.72rem;background:var(--blue-tint);color:var(--blue-deep);border-radius:999px;padding:2px 10px;font-weight:700}
-  .off-meta{margin-top:4px;font-size:.82rem;color:#33384c}
-  .off-note{margin-top:2px;font-size:.78rem;color:var(--muted)}
-  .off-empty{color:var(--muted);font-size:.88rem}
 </style>
 </head>
 <body>
@@ -338,9 +344,9 @@
     <div id="exams"></div>
   </div>
 
-  <div class="card" id="sec-offerings">
-    <h2>近期開課資訊</h2>
-    <div data-offerings></div>
+  <div class="card" id="sec-special">
+    <h2>特別班</h2>
+    <div id="special"></div>
   </div>
 </div>
 
@@ -352,7 +358,6 @@
      boot() is the tell — check this URL first. charset per LINE's docs. -->
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="../offerings.js" defer></script>
 <script>
 (function () {
   // ── config ────────────────────────────────────────────────────────────────
@@ -385,7 +390,7 @@
     // so its label lied, and there was no way back to the overview from 餐費
     // except tapping something that says homework. 'hw' KEPT its key (keys are
     // additive, never renamed), it just carries less now.
-    home:     ["summary", "tiles", "owe", "notices", "sec-offerings"],
+    home:     ["summary", "tiles", "owe", "notices", "sec-special"],
     // 'bind' is a STATE, not a card set — it shows st-bind instead of st-report,
     // so its list is empty. It exists because the ＋綁定另一個孩子 button was
     // removed: only 11 of 145 families have a second child, so a permanent
@@ -401,7 +406,7 @@
     progress: ["sec-progress", "sec-trend", "sec-units", "sec-exams"],
   };
   var VIEW_IDS = ["summary", "owe", "tiles", "notices", "sec-hw", "sec-week", "sec-fee", "sec-meal",
-                  "sec-progress", "sec-trend", "sec-units", "sec-exams", "sec-offerings"];
+                  "sec-progress", "sec-trend", "sec-units", "sec-exams", "sec-special"];
 
   /** Which view the URL asks for; 'home' when it asks for nothing or for
    *  something unknown — opening the LIFF directly lands on 首頁, the same
@@ -584,12 +589,20 @@
         // being a label you must tap to discover there is nothing there yet
         sb.from("readiness_snapshots").select("snapshot_date, readiness")
           .eq("student_id", sid).eq("subject", "數學").order("snapshot_date"),
+        // 特別班 — class_offerings is anon-readable and status-gated, so this is
+        // the same list the 官網 advertises, narrowed to the separately-enrolled
+        // ones. Not student-scoped: a 特別班 is open to a grade, not to a child.
+        sb.from("class_offerings")
+          .select("name, grade_label, subject, schedule, start_date, signup_deadline, note")
+          .eq("kind", "special").eq("status", "open")
+          .order("sort_order").order("signup_deadline", { nullsFirst: false }),
       ]);
       var week = r[5].data || [];
       renderNotices(r[0].data || []);
       renderSummary(kidById(sid), week);
       renderOwe(r[2].data || [], (r[3].data || []).length);
       renderTiles(r[1].data || [], r[4].data, week, r[6].data || []);
+      renderSpecial(r[7].data || []);
       return;
     }
 
@@ -783,6 +796,35 @@
     if (out <= 0) { el.innerHTML = ""; return; }
     el.innerHTML = '<a class="owe" href="?s=fee"><span class="oL">本期尚有學費未繳</span>' +
       '<span class="oV">NT$' + Number(out).toLocaleString("en-US") + '</span><span class="oC">›</span></a>';
+  }
+
+  /** 特別班 — AMC / AIME / 寒暑假出國班: things a parent can MISS, because they
+   *  need a separate signup and they close. Regular classes are not here; the
+   *  child is already in them, and 近期開課資訊 was the 官網's copy for families
+   *  still deciding whether to enrol.
+   *  🔑 NO ROWS → NO CARD AT ALL. 「今天沒有作業」 is information; 「目前沒有特別班」
+   *  is not — an empty state only earns its place where a parent expected
+   *  something. The card hides itself rather than reporting its own emptiness. */
+  function renderSpecial(rows) {
+    var card = $("sec-special");
+    if (!rows.length) { if (card) card.classList.add("vhide"); return; }
+    if (card) card.classList.remove("vhide");
+    var today = todayLocal();
+    var md = function (d) { return String(d || "").slice(5).replace("-", "/"); };
+    $("special").innerHTML = rows.map(function (r) {
+      var past = r.signup_deadline && r.signup_deadline < today;
+      return '<div class="spR"><div class="spH"><b>' + esc(r.name || "") + "</b>" +
+        (r.grade_label ? '<span class="tg">' + esc(r.grade_label) + "</span>" : "") + "</div>" +
+        (r.schedule || r.start_date
+          ? '<div class="spM">' + esc(r.schedule || "") +
+            (r.start_date ? "　" + esc(md(r.start_date)) + " 開課" : "") + "</div>"
+          : "") +
+        (r.signup_deadline
+          ? '<div class="spD' + (past ? " past" : "") + '">' +
+            (past ? "報名已截止" : "報名截止 " + esc(md(r.signup_deadline))) + "</div>"
+          : "") +
+        (r.note ? '<div class="spN">' + esc(r.note) + "</div>" : "") + "</div>";
+    }).join("");
   }
 
   function renderNotices(rows) {
