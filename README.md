@@ -10,7 +10,7 @@ talk straight to Supabase PostgREST with the **anon key** (public by design);
 | `index.html` | 官網首頁 (brand v4 版型 + live 開課資訊) |
 | `elementary/junior/senior.html` | 年段頁 (國小/國中/高中) |
 | `parent/index.html` | 家長專區 — LIFF page (LINE login → 綁定碼 → 提醒 · 課程/作業 · 課表 · 未繳學費 · 餐費 · 學習進度) |
-| `offerings.js` | renders 開課資訊 from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com) |
+| `offerings.js` | renders the **特別班** list from `class_offerings` (the one anon-readable table; edited on admin.chiaweiedu.com). **常態班 are NOT advertised publicly** (Patty, 2026-08-20) — the 年段 pages describe them at length, and repeating them as "news" says nothing new. A 特別班 is separately enrolled and CLOSES, so it is the one kind a family can miss. |
 | `legal/privacy-v1.html` | 個資法 告知/同意文 — site-wide 告知 covering the 預約表單 |
 | `legal/privacy-v2.html` | the version `parent_bind()` records; **a new version is a NEW FILE, never an edit** |
 | `parent/richmenu/` | LINE 圖文選單 artwork + its tap-area map (see that dir's README) |

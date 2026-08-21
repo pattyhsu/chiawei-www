@@ -1,4 +1,14 @@
-// offerings.js — renders 開課資訊 from the class_offerings table.
+// offerings.js — renders 特別班 from the class_offerings table.
+//
+// 🔑 特別班 ONLY (Patty, 2026-08-20): "i dont want 常態班 advertised publicly. i
+// only want 特別班 advertised publicly." 常態班 are what the 年段 pages already
+// describe at length; listing them again as "news" says nothing new. A 特別班 —
+// AMC / AIME / 寒暑假遊學 — is separately enrolled and CLOSES, so it is the only
+// kind where a public listing does work: it can be missed.
+//
+// The 最新開課 section was deleted in 67e269d as noise. This is not a restore of
+// it; it is a narrower section that earns its place because every row has a
+// deadline.
 //
 // This is the ONE deliberately anon-readable table (RLS: status='open' rows
 // only — see chiawei-platform migration 20260806000001). The key below is the
@@ -31,6 +41,18 @@
     return p[1] + "/" + p[2] + " 開課";
   }
 
+  function mmdd(iso) {
+    if (!iso) return "";
+    var p = iso.split("-");
+    return p[1] + "/" + p[2];
+  }
+
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+           "-" + String(d.getDate()).padStart(2, "0");
+  }
+
   function matches(row, stage) {
     var hints = STAGE_HINTS[stage];
     if (!hints) return true;
@@ -40,8 +62,10 @@
 
   function render(el, rows) {
     if (!rows.length) {
+      // Says what it IS, not what it lacks: 常態班 招生 never stops, so an empty
+      // 特別班 list is not "nothing on offer".
       el.innerHTML =
-        '<p class="off-empty">目前沒有新班公告——各年段常年招生中，歡迎加 LINE 詢問插班與試聽。</p>';
+        '<p class="off-empty">目前沒有招生中的特別班——各年段常態班常年招生，歡迎加 LINE 詢問插班與試聽。</p>';
       return;
     }
     el.innerHTML = rows
@@ -55,6 +79,12 @@
           '<div class="off-meta num">' +
           [esc(r.schedule || ""), esc(rocDate(r.start_date))].filter(Boolean).join("　") +
           "</div>" +
+          (r.signup_deadline
+            ? '<div class="off-due' + (r.signup_deadline < todayISO() ? " past" : "") + '">' +
+              (r.signup_deadline < todayISO()
+                ? "報名已截止"
+                : "報名截止 " + esc(mmdd(r.signup_deadline))) + "</div>"
+            : "") +
           (r.note ? '<div class="off-note">' + esc(r.note) + "</div>" : "") +
           "</div>"
         );
@@ -67,8 +97,9 @@
     if (!slots.length) return;
     fetch(
       SUPABASE_URL +
-        "/rest/v1/class_offerings?select=name,grade_label,subject,schedule,start_date,note" +
-        "&status=eq.open&order=sort_order.asc,start_date.asc.nullslast",
+        "/rest/v1/class_offerings?select=name,grade_label,subject,schedule,start_date,note,signup_deadline" +
+        "&kind=eq.special&status=eq.open" +
+        "&order=sort_order.asc,signup_deadline.asc.nullslast",
       { headers: { apikey: ANON_KEY } }
     )
       .then(function (res) { return res.ok ? res.json() : []; })

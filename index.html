@@ -45,6 +45,21 @@
 }
 </script>
 <style>
+  /* 特別班 list (offerings.js) — the deadline is the heaviest line, because it
+     is the only part of a 特別班 a family can actually miss. */
+  .offlist{display:grid;gap:12px;max-width:840px}
+  .off-row{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:14px;padding:16px 18px}
+  .off-main{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .off-main b{font-size:1.05rem;font-weight:800;color:var(--blue-ink)}
+  .off-tag{font-size:.76rem;background:var(--blue-tint);color:var(--blue-deep);
+    border-radius:999px;padding:3px 11px;font-weight:700}
+  .off-meta{margin-top:6px;font-size:.92rem;color:#33384c}
+  .off-due{margin-top:7px;font-size:.94rem;font-weight:900;color:var(--orange)}
+  .off-due.past{color:var(--slate);font-weight:700}
+  .off-note{margin-top:4px;font-size:.86rem;color:var(--slate)}
+  .off-empty{color:var(--slate);font-size:.95rem}
+
   :root{
     --paper:#F5F7FC; --card:#FFFFFF; --ink:#141A2E; --slate:#5A6076; --line:#E2E6F0;
     --blue:#2547C7; --blue-deep:#1A2F86; --blue-ink:#0F1C4D;
@@ -591,6 +606,21 @@
   </div>
 </section>
 
+<!-- ===== 特別班（live：admin 開課資訊台發布 kind=特別班，此區自動更新） =====
+     ONLY 特別班 is advertised here (Patty, 2026-08-20). 常態班 are described at
+     length on the 年段 pages; repeating them as "news" says nothing new. A 特別班
+     is separately enrolled and CLOSES — it is the one kind a family can miss. -->
+<section id="special" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">特別班 · Special Programs</div>
+      <h2>另外招生的特別班</h2>
+      <p class="sub">檢定班、遊學團這類需要<b>另外報名</b>的班別。名額與報名截止都寫在下面；常態班不列在這裡，各年段常年招生。</p>
+    </div>
+    <div class="offlist" data-offerings></div>
+  </div>
+</section>
+
 <!-- ===== 暑期班 seasonal banner（換季換這格：寒假班/會考衝刺） ===== -->
 <div class="summer" id="summer">
   <div class="wrap summer-in">
@@ -825,5 +855,6 @@
 })();
 </script>
 <script src="lead-form.js" defer></script>
+<script src="offerings.js" defer></script>
 </body>
 </html>
