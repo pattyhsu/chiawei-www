@@ -23,8 +23,13 @@
   :root{
     --brand:#2547C7; --blue-deep:#1A2F86; --blue-ink:#0F1C4D; --gold:#F8C414; --orange:#EF5226;
     --level-0:#EF5226; --level-1:#D9A400; --level-2:#5B85DC; --level-3:#2547C7;
-    --ink:#141A2E; --muted:#6B7280; --line:#E3E6EE; --untested:#DFE3ED;
-    --paper:#F5F7FC; --card:#fff; --blue-tint:#EEF1FC;
+    /* The coldness was never the brand — 橘/黃 are brand accents. It was the
+       NEUTRALS: a blue-grey ground (#F5F7FC) made every surface lean cool and
+       left the warm colours appearing only as alarms. Warmed here, and only
+       here; 寶藍 still carries identity and headings. */
+    --ink:#211D18; --muted:#7A7266; --line:#EBE3D8; --untested:#E3DCD1;
+    --paper:#FBF7F1; --card:#fff; --blue-tint:#EEF1FC;
+    --warm-tint:#FBF3E6; --warm-line:#F0E2CC;
     --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
   }
   *{margin:0;box-sizing:border-box}
@@ -32,6 +37,7 @@
   .num{font-variant-numeric:tabular-nums lining-nums}
   .wrap{max-width:640px;margin:0 auto;padding:0 16px}
   header.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:16px}
+  .top-in b{color:var(--blue-ink)}
   .top-in{max-width:640px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:10px}
   .top-in img{height:32px}
   .top-in b{font-size:1rem;font-weight:900}
@@ -47,13 +53,39 @@
   .sumWho{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
   .sumWho b{font-size:1rem;font-weight:900;color:var(--blue-ink)}
   .sumWho span{font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
-  .sumToday{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px;
-    padding-bottom:10px;border-bottom:1px dashed var(--line)}
+  .sumToday{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
   .sumToday .lab{font-size:.76rem;font-weight:800;color:var(--muted)}
   .sumToday .t{font-size:.95rem;font-weight:900;color:var(--blue-ink);font-variant-numeric:tabular-nums}
   .sumToday .n{font-size:.88rem;font-weight:700;color:#33384c}
   .sumToday .off{font-size:.9rem;font-weight:700;color:var(--muted)}
   .sumChips{display:flex;flex-wrap:wrap;gap:7px}
+
+  /* 首頁 tiles — 木生's home is a grid of things you can tap, each already
+     carrying its own number. Ours does the same: the tile IS the state, so a
+     parent reads 餐費 NT$815 without opening 餐費. */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .tile{
+    display:block;text-decoration:none;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:14px 15px;
+  }
+  .tile .tI{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;margin-bottom:9px;
+    background:var(--warm-tint);border:1px solid var(--warm-line)}
+  .tile .tI svg{width:20px;height:20px;color:#C97A16}
+  .tile .tL{font-size:.86rem;font-weight:900;color:var(--blue-ink);line-height:1.2}
+  .tile .tV{font-size:.8rem;font-weight:700;color:#4A4237;margin-top:3px;font-variant-numeric:tabular-nums}
+  .tile .tV.q{color:var(--muted);font-weight:600}
+  .tile .tV.warn{color:#B23A12;font-weight:800}
+
+  /* 未繳 is FILLED, not tinted — the tiles are ambient warmth now, so an alarm
+     that is merely a warmer tint would stop reading as an alarm. Same rule the
+     檢討單 follows: colour may never be the only thing carrying the meaning,
+     so the amount is stated in words too. */
+  .owe{display:flex;align-items:center;gap:10px;background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-left:4px solid var(--orange);
+    border-radius:14px;padding:12px 15px;margin-bottom:14px;text-decoration:none}
+  .owe .oL{font-size:.8rem;font-weight:800;color:#4A4237}
+  .owe .oV{margin-left:auto;font-size:1rem;font-weight:900;color:var(--orange);font-variant-numeric:tabular-nums}
+  .owe .oC{font-size:1rem;color:var(--muted)}
   .chip{font-size:.82rem;font-weight:700;border-radius:999px;padding:5px 12px;background:#F1F3F8;color:#33384c;white-space:nowrap}
   .chip.hot{background:var(--blue-tint);color:var(--blue-deep)}
   .chip.warn{background:#FDEDE6;color:#B23A12}
@@ -255,6 +287,8 @@
   <!-- 老師提醒 pins ABOVE everything: it is forward-looking (「本週六加課」) and
        time-boxed, so burying it under today's homework would defeat it. -->
   <div id="summary"></div>
+  <div id="tiles"></div>
+  <div id="owe"></div>
   <div id="notices"></div>
 
   <!-- 課程與作業 sits FIRST: it is the thing a parent opens this page for on a
@@ -351,7 +385,7 @@
     // so its label lied, and there was no way back to the overview from 餐費
     // except tapping something that says homework. 'hw' KEPT its key (keys are
     // additive, never renamed), it just carries less now.
-    home:     ["summary", "notices", "sec-offerings"],
+    home:     ["summary", "tiles", "owe", "notices", "sec-offerings"],
     // 'bind' is a STATE, not a card set — it shows st-bind instead of st-report,
     // so its list is empty. It exists because the ＋綁定另一個孩子 button was
     // removed: only 11 of 145 families have a second child, so a permanent
@@ -366,7 +400,7 @@
     meal:     ["sec-meal"],
     progress: ["sec-progress", "sec-trend", "sec-units", "sec-exams"],
   };
-  var VIEW_IDS = ["summary", "notices", "sec-hw", "sec-week", "sec-fee", "sec-meal",
+  var VIEW_IDS = ["summary", "owe", "tiles", "notices", "sec-hw", "sec-week", "sec-fee", "sec-meal",
                   "sec-progress", "sec-trend", "sec-units", "sec-exams", "sec-offerings"];
 
   /** Which view the URL asks for; 'home' when it asks for nothing or for
@@ -526,7 +560,7 @@
     var v = currentView;
 
     if (v === "home") {
-      // The summary chips need 學費 and 餐費 numbers, so 首頁 costs ~5 queries.
+      // 首頁 carries the tiles, so it needs each of their numbers: ~7 queries.
       // The journal is fetched only far enough back to find TODAY's entry — the
       // full list belongs to the 作業 view.
       var r = await Promise.all([
@@ -546,10 +580,16 @@
         // thing to say about a child who has a timetable at all (see renderSummary)
         sb.from("parent_schedule_v").select("class_name, weekday, starts_at, ends_at")
           .eq("student_id", sid).order("weekday").order("starts_at"),
+        // one more than before, so the 進度 tile can carry its number instead of
+        // being a label you must tap to discover there is nothing there yet
+        sb.from("readiness_snapshots").select("snapshot_date, readiness")
+          .eq("student_id", sid).eq("subject", "數學").order("snapshot_date"),
       ]);
+      var week = r[5].data || [];
       renderNotices(r[0].data || []);
-      renderSummary(kidById(sid), r[1].data || [], r[2].data || [],
-                    (r[3].data || []).length, r[4].data, r[5].data || []);
+      renderSummary(kidById(sid), week);
+      renderOwe(r[2].data || [], (r[3].data || []).length);
+      renderTiles(r[1].data || [], r[4].data, week, r[6].data || []);
       return;
     }
 
@@ -650,10 +690,10 @@
    *  instead of scrolling, so 「學費已繳清」 with no fee entered would be a false
    *  claim delivered with maximum confidence. Nothing known → no strip at all.
    *  Same family as the absent-≠-zero bug in grading. */
-  function renderSummary(kid, jrn, fee, enrolledCount, mbal, week) {
+  function renderSummary(kid, week) {
     var el = $("summary");
     var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
-    var today = todayLocal(), chips = [];
+    var today = todayLocal();
 
     // 今天上課時間 — the recurring half of the question 每週課表 answers once a
     // term. 「今天沒有課」 is a CLAIM, so it is made only about a child who has a
@@ -676,44 +716,73 @@
       todayHtml = '<div class="sumToday"><span class="lab">今天</span><span class="off">沒有課</span></div>';
     }
 
-    // 作業 speaks only if the teacher wrote TODAY. No entry means "not filled
-    // in yet", which is not the same as "no homework".
+    // Identity is not state: whose page this is must always show on 首頁, even
+    // for a child with no timetable. Only the 今天 line is conditional.
+    if (!kid || !kid.name) { el.innerHTML = ""; return; }
+    el.innerHTML = '<div class="sum"><div class="sumWho"><b>' + esc(kid.name || "") +
+      "</b><span>" + esc(kid.student_no || "") + "</span></div>" + todayHtml + "</div>";
+  }
+
+  var TILE_ICON = {
+    hw:   '<path d="M5 3.5h11.5a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H5z"/><path d="M5 3.5a1.6 1.6 0 0 0 0 3.2h2.2"/><path d="M8.6 12.2l2.4 2.4 4.6-5"/>',
+    week: '<rect x="3" y="5" width="18" height="16" rx="2.4"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.4 14h3M13.6 14h3"/>',
+    meal: '<path d="M3.8 11.6h16.4c0 4.5-3.7 8.2-8.2 8.2s-8.2-3.7-8.2-8.2z"/><path d="M2.2 20.6h19.6"/><path d="M9.6 8.9c-1-1.1 1-2.1 0-3.2M14.4 8.9c-1-1.1 1-2.1 0-3.2"/>',
+    progress: '<path d="M3.4 20.4h17.2"/><path d="M6.4 20.4v-5.8M11 20.4V9.6M15.6 20.4v-8.4M20.2 20.4V5.4"/>',
+  };
+
+  /** 首頁 tiles — each one already carries its own number, so a parent reads
+   *  餐費 NT$815 without opening 餐費. Same omit-don't-zero rule as the chips:
+   *  a tile whose data is unknown says so in words («尚未填寫», «尚未公告»),
+   *  it never shows a 0 that would read as an answer. */
+  function renderTiles(jrn, mbal, week, snaps) {
+    var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
+    var today = todayLocal(), hhmm = function (t) { return String(t || "").slice(0, 5); };
+
     var td = null;
     for (var i = 0; i < jrn.length; i++) if (jrn[i].entry_date === today) { td = jrn[i]; break; }
-    if (td) chips.push(td.homework ? { cls: "hot", t: "今天有作業" } : { cls: "", t: "今天沒有作業" });
+    var hwV = td ? (td.homework ? "今天有作業" : "今天沒有作業") : "老師尚未填寫";
 
-    // 學費 has NO menu button (Patty, 2026-08-20): four collections a year does
-    // not earn a permanent one, and a standing 未繳 reminder is the opposite of
-    // what a parent wants on their phone. So this chip IS the way in — it links
-    // to the 學費 view, and appears ONLY when money is actually owed. There is
-    // deliberately no 「學費已繳清」 chip: a permanent reassurance nobody asked
-    // for is the same clutter in a friendlier voice.
-    // Still withheld entirely unless every enrolled class is priced — see
-    // renderFee for why a partial sum is worse than no sum.
-    if (fee.length > 0 && fee.length === enrolledCount) {
-      var out = fee.reduce(function (a, r) { return a + Number(r.outstanding || 0); }, 0);
-      if (out > 0) chips.push({ cls: "warn", t: "未繳 " + money(out), href: "?s=fee" });
-    }
+    var todayW = new Date().getDay(), n = 0;
+    (week || []).forEach(function (r) { if (Number(r.weekday) === todayW) n++; });
+    var wkV = (week || []).length ? (n ? "今天 " + hhmm(week.filter(function (r) {
+      return Number(r.weekday) === todayW; })[0].starts_at) + " 上課" : "今天沒有課") : "尚未安排";
 
-    if (mbal && mbal.balance != null) {
-      var b = Number(mbal.balance);
-      chips.push(b < 0 ? { cls: "warn", t: "餐費已欠款 " + money(Math.abs(b)) }
-               : b < 500 ? { cls: "gold", t: "餐費 " + money(b) + "（偏低）" }
-               : { cls: "", t: "餐費 " + money(b) });
-    }
+    // A negative balance says 已欠款, never a minus sign for a parent to
+    // interpret — same wording renderMeal uses. The child ate; that is the
+    // honest reading, and it should not differ between the tile and the card.
+    var mlB = mbal && mbal.balance != null ? Number(mbal.balance) : null;
+    var mlV = mlB === null ? "尚無紀錄"
+            : mlB < 0 ? "已欠款 " + money(Math.abs(mlB))
+            : money(mlB);
+    var mlLow = mlB !== null && mlB < 500;
 
-    if (!chips.length && !todayHtml) { el.innerHTML = ""; return; }
-    el.innerHTML = '<div class="sum"><div class="sumWho"><b>' + esc(kid.name || "") +
-      "</b><span>" + esc(kid.student_no || "") + "</span></div>" + todayHtml +
-      (chips.length ? '<div class="sumChips">' +
-        chips.map(function (c) {
-        // a chip with a destination is a real link — a same-origin navigation
-        // reloads the page, which is exactly how a menu tap works too
-        return c.href
-          ? '<a class="chip ' + c.cls + '" href="' + esc(c.href) + '">' + esc(c.t) + " ›</a>"
-          : '<span class="chip ' + c.cls + '">' + esc(c.t) + "</span>";
-      }).join("") +
-        "</div>" : "") + "</div>";
+    var last = (snaps || []).length ? snaps[snaps.length - 1] : null;
+    var pgV = last ? last.readiness + " 分（已學範圍）" : "尚未累積";
+
+    var t = [["hw", "作業", hwV, td && td.homework ? "" : "q"],
+             ["week", "課表", wkV, (week || []).length ? "" : "q"],
+             ["meal", "餐費", mlV, mbal && mbal.balance != null ? (mlLow ? "warn" : "") : "q"],
+             ["progress", "進度", pgV, last ? "" : "q"]];
+
+    $("tiles").innerHTML = '<div class="tiles">' + t.map(function (x) {
+      return '<a class="tile" href="?s=' + x[0] + '"><div class="tI">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+        'stroke-linecap="round" stroke-linejoin="round">' + TILE_ICON[x[0]] + "</svg></div>" +
+        '<div class="tL">' + esc(x[1]) + '</div><div class="tV ' + x[3] + '">' + esc(x[2]) + "</div></a>";
+    }).join("") + "</div>";
+  }
+
+  /** The 未繳 band. Withheld unless EVERY enrolled class is priced (see
+   *  renderFee), and absent entirely when nothing is owed — the school collects
+   *  four times a year and a standing reminder of a debt is what Patty removed
+   *  the 學費 button to avoid. */
+  function renderOwe(fee, enrolledCount) {
+    var el = $("owe");
+    if (!(fee.length > 0 && fee.length === enrolledCount)) { el.innerHTML = ""; return; }
+    var out = fee.reduce(function (a, r) { return a + Number(r.outstanding || 0); }, 0);
+    if (out <= 0) { el.innerHTML = ""; return; }
+    el.innerHTML = '<a class="owe" href="?s=fee"><span class="oL">本期尚有學費未繳</span>' +
+      '<span class="oV">NT$' + Number(out).toLocaleString("en-US") + '</span><span class="oC">›</span></a>';
   }
 
   function renderNotices(rows) {
