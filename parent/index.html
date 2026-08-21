@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>家偉文理補習班｜家長專區</title>
+<title>家偉補習班</title>
 <link rel="icon" type="image/svg+xml" href="../ant-logo.svg">
 <!--
   家長專區 — LIFF page (also works in a normal browser via LINE Login).
@@ -247,7 +247,7 @@
 </head>
 <body>
 
-<header class="top">
+<header class="top vhide">
   <div class="top-in">
     <img src="../ant-logo.svg" alt="">
     <b>家長專區</b>
@@ -458,8 +458,13 @@
     // where a parent may discover they are signed in as the wrong LINE account,
     // still needs its header. Every state change funnels through here; view
     // changes do not exist in-page (each menu tap is a fresh load).
+    // Hidden by default in the markup, so the SPLASH stands alone: it already
+    // carries the ant and 家偉補習班, and a header saying 家長專區 directly above
+    // it was the same brand twice on a screen whose whole job is to say who this
+    // belongs to while the data loads (Patty, 2026-08-20).
     var hd = document.querySelector("header.top");
-    if (hd) hd.classList.toggle("vhide", id === "st-report" && currentView !== "home");
+    if (hd) hd.classList.toggle("vhide",
+      id === "st-loading" || (id === "st-report" && currentView !== "home"));
   }
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
