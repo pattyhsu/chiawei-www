@@ -356,10 +356,10 @@
   .ctaband{background:linear-gradient(150deg,var(--blue),var(--blue-ink));color:#fff}
   /* copy 左、表單右；手機時表單排在聯絡資訊之前（主要動作優先） */
   .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,52px);align-items:start;
-    grid-template-areas:"copy form" "contact form" "ant form"}
+    grid-template-areas:"copy form" "ant form" "ant contact"}
   .cta-copy{grid-area:copy}
   .cta-grid>.leadform{grid-area:form}
-  .cta-grid>.contact{grid-area:contact;background:transparent;border:none;border-top:1px dashed rgba(255,255,255,.24);border-radius:0;padding:16px 0 0;margin-top:4px}
+  .cta-grid>.contact{grid-area:contact;background:transparent;border:none;border-top:1px dashed rgba(255,255,255,.24);border-radius:0;padding:16px 0 0;margin-top:18px}
   .cta-grid>.contact div{margin-bottom:6px}
   /* 首頁的聯絡區只留一行：頁尾就在正下方，四校區地址電話都在那裡，這裡
      只是給「不想填表、想直接打」的人一個出口（桌機沒有 .stickybar）。
@@ -372,7 +372,7 @@
   /* 收尾的螞蟻 — CTA 左下角本來就是空的（contact 短、右邊表單高），吉祥物填進去
      當結尾簽名。用彩色標，NOT ant-logo-reverse：reverse 會把整塊黑短褲翻成白的，
      看起來像穿白短褲。裝飾性質，所以 alt="" 讓螢幕閱讀器略過。 */
-  .cta-ant{grid-area:ant;height:330px;width:auto;display:block;align-self:end;justify-self:start;margin:86px 0 26px}
+  .cta-ant{grid-area:ant;height:400px;width:auto;display:block;align-self:end;justify-self:start;margin:70px 0 0}
   @media(max-width:820px){.cta-grid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "contact" "ant"}
     .cta-ant{height:150px;margin:40px 0 0}}
   .ctaband h2{font-size:clamp(1.6rem,3.8vw,2.4rem);font-weight:900;letter-spacing:.02em}
@@ -774,7 +774,7 @@
         <div data-lead-form data-page="index" data-stages="國小,國中,高中"></div>
       </div>
     <div class="contact">
-      <div class="c-line"><b>不想填表？</b>直接聯絡我們 —
+      <div class="c-line"><b>不想填表？</b>
         <span class="c-item">LINE <b>@chiawei</b></span>｜<span class="c-item">頭份 <a href="tel:037682000">(037) 682-000</a></span>｜<span class="c-item">竹南 <a href="tel:037465222">(037) 465-222</a></span></div>
     </div>
     <img class="cta-ant" src="ant-logo.svg" alt="">
