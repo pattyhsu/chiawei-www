@@ -39,7 +39,7 @@ const TOKEN = token();
 const H = { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" };
 
 const LIFF = "2011161502-kGxpeEuI";
-const COLS = 6, W = Math.floor(2500 / 6), HH = 843;   // 416px columns
+const COLS = 5, W = Math.floor(2500 / 5), HH = 843;   // 500px columns
 
 // Column order is the artwork's, left to right. Changing either without the
 // other silently mis-aims every button — see README.md's tap-area table.
@@ -50,10 +50,13 @@ const BUTTONS = [
   ["首頁", "home"],
   ["作業", "hw"],
   ["課表", "week"],
-  ["學費", "fee"],
   ["餐費", "meal"],
   ["進度", "progress"],
 ];
+// 學費 is deliberately NOT here: four collections a year does not earn a
+// permanent button, and a standing 未繳 reminder is the opposite of what a
+// parent wants on their phone. The `fee` KEY still resolves — keys are additive,
+// never removed — and the 首頁 未繳 chip links to it when money is owed.
 
 const MENU = {
   size: { width: 2500, height: 843 },          // compact

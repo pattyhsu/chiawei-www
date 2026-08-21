@@ -58,6 +58,7 @@
   .chip.hot{background:var(--blue-tint);color:var(--blue-deep)}
   .chip.warn{background:#FDEDE6;color:#B23A12}
   .chip.gold{background:#FEF6DC;color:#8A6500}
+  a.chip{text-decoration:none}
 
   /* splash — a LIFF sheet opens on a blank white panel, so the first thing a
      parent sees should say whose it is */
@@ -681,11 +682,17 @@
     for (var i = 0; i < jrn.length; i++) if (jrn[i].entry_date === today) { td = jrn[i]; break; }
     if (td) chips.push(td.homework ? { cls: "hot", t: "今天有作業" } : { cls: "", t: "今天沒有作業" });
 
-    // 學費 is withheld entirely unless every enrolled class is priced — see
+    // 學費 has NO menu button (Patty, 2026-08-20): four collections a year does
+    // not earn a permanent one, and a standing 未繳 reminder is the opposite of
+    // what a parent wants on their phone. So this chip IS the way in — it links
+    // to the 學費 view, and appears ONLY when money is actually owed. There is
+    // deliberately no 「學費已繳清」 chip: a permanent reassurance nobody asked
+    // for is the same clutter in a friendlier voice.
+    // Still withheld entirely unless every enrolled class is priced — see
     // renderFee for why a partial sum is worse than no sum.
     if (fee.length > 0 && fee.length === enrolledCount) {
       var out = fee.reduce(function (a, r) { return a + Number(r.outstanding || 0); }, 0);
-      chips.push(out > 0 ? { cls: "warn", t: "未繳 " + money(out) } : { cls: "", t: "學費已繳清" });
+      if (out > 0) chips.push({ cls: "warn", t: "未繳 " + money(out), href: "?s=fee" });
     }
 
     if (mbal && mbal.balance != null) {
@@ -699,7 +706,13 @@
     el.innerHTML = '<div class="sum"><div class="sumWho"><b>' + esc(kid.name || "") +
       "</b><span>" + esc(kid.student_no || "") + "</span></div>" + todayHtml +
       (chips.length ? '<div class="sumChips">' +
-        chips.map(function (c) { return '<span class="chip ' + c.cls + '">' + esc(c.t) + "</span>"; }).join("") +
+        chips.map(function (c) {
+        // a chip with a destination is a real link — a same-origin navigation
+        // reloads the page, which is exactly how a menu tap works too
+        return c.href
+          ? '<a class="chip ' + c.cls + '" href="' + esc(c.href) + '">' + esc(c.t) + " ›</a>"
+          : '<span class="chip ' + c.cls + '">' + esc(c.t) + "</span>";
+      }).join("") +
         "</div>" : "") + "</div>";
   }
 

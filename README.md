@@ -62,6 +62,21 @@ channel created **inside that provider's own page**.
    POSTing a junk token: **401 `bad_token`** = configured, **503 `not_configured`**
    = not.
 
+### 學費 has no menu button, on purpose
+
+Removed 2026-08-20 (Patty): the school collects **four times a year**, and *"no
+parents wants to constantly see that they need to pay up"*. A permanent button
+for a quarterly errand is a standing reminder of a debt on someone's phone.
+
+The way in is the **未繳 chip on 首頁**, which appears only when money is actually
+owed and links to `?s=fee`. So for most of the year a parent sees nothing about
+fees at all. There is deliberately **no 「學費已繳清」 chip** — a permanent
+reassurance nobody asked for is the same clutter in a friendlier voice.
+
+⚠️ **The `fee` key still resolves and must keep resolving.** Keys are additive,
+never removed: `?s=fee` is what the chip links to, and it is also the link to
+send at collection time if the chip is ever not enough.
+
 ### 綁定第二個孩子 — the office sends a LINK, not just a code
 
 There is no ＋綁定另一個孩子 button. Only **11 of 145 families** have more than one
