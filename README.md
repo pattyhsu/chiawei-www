@@ -33,6 +33,7 @@ to a real LINE channel on 2026-08-18. The 產生家長綁定碼 button lives in
 | LIFF scopes | `openid` + `profile` only (**never `email`** — needless PII) |
 | LIFF endpoint | `https://www.chiaweiedu.com/parent/` |
 | LIFF size | **`Tall`** (~80% of screen), NOT `Full`. Patty's call 2026-08-18, against 木生婦幼's: a full-screen takeover to check one homework line reads as heavier than the errand. `Compact` (~50%) was the alternative, judged too short for a six-section scrolling report. |
+| 圖文選單 | Messaging-API rich menu, **5 keys** 首頁·作業·課表·餐費·進度 — published by `parent/richmenu/deploy.mjs`. OA Manager caps compact templates at 3 columns, and the two consoles **cannot see each other's menus in either direction** |
 | Add friend option | `On (Normal)` — offered, not pre-ticked |
 
 **The same-provider requirement is SATISFIED and that is the whole ballgame.**
