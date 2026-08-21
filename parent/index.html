@@ -74,7 +74,10 @@
   .tile .tL{font-size:.86rem;font-weight:900;color:var(--blue-ink);line-height:1.2}
   .tile .tV{font-size:.8rem;font-weight:700;color:#4A4237;margin-top:3px;font-variant-numeric:tabular-nums}
   .tile .tV.q{color:var(--muted);font-weight:600}
-  .tile .tV.warn{color:#B23A12;font-weight:800}
+  /* NOT .warn — that is the global withheld-fee notice, with a background,
+     border and padding of its own that a tile value must not inherit. */
+  .tile .tV.due{color:#B23A12;font-weight:800}
+  .tile.wide{grid-column:1 / -1}
 
   /* 未繳 is FILLED, not tinted — the tiles are ambient warmth now, so an alarm
      that is merely a warmer tint would stop reading as an alarm. Same rule the
@@ -390,7 +393,8 @@
     // so its label lied, and there was no way back to the overview from 餐費
     // except tapping something that says homework. 'hw' KEPT its key (keys are
     // additive, never renamed), it just carries less now.
-    home:     ["summary", "tiles", "owe", "notices", "sec-special"],
+    home:     ["summary", "tiles", "owe", "notices"],
+    special:  ["sec-special"],
     // 'bind' is a STATE, not a card set — it shows st-bind instead of st-report,
     // so its list is empty. It exists because the ＋綁定另一個孩子 button was
     // removed: only 11 of 145 families have a second child, so a permanent
@@ -601,8 +605,7 @@
       renderNotices(r[0].data || []);
       renderSummary(kidById(sid), week);
       renderOwe(r[2].data || [], (r[3].data || []).length);
-      renderTiles(r[1].data || [], r[4].data, week, r[6].data || []);
-      renderSpecial(r[7].data || []);
+      renderTiles(r[1].data || [], r[4].data, week, r[6].data || [], r[7].data || []);
       return;
     }
 
@@ -613,6 +616,15 @@
         .select("class_id, class_name, subject, entry_date, progress, homework")
         .eq("student_id", sid).order("entry_date", { ascending: false }).limit(40)).data || [];
       renderJournal(jrn);
+      return;
+    }
+
+    if (v === "special") {
+      var sp = (await sb.from("class_offerings")
+        .select("name, grade_label, subject, schedule, start_date, signup_deadline, note")
+        .eq("kind", "special").eq("status", "open")
+        .order("sort_order").order("signup_deadline", { nullsFirst: false })).data || [];
+      renderSpecial(sp);
       return;
     }
 
@@ -741,15 +753,17 @@
     week: '<rect x="3" y="5" width="18" height="16" rx="2.4"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.4 14h3M13.6 14h3"/>',
     meal: '<path d="M3.8 11.6h16.4c0 4.5-3.7 8.2-8.2 8.2s-8.2-3.7-8.2-8.2z"/><path d="M2.2 20.6h19.6"/><path d="M9.6 8.9c-1-1.1 1-2.1 0-3.2M14.4 8.9c-1-1.1 1-2.1 0-3.2"/>',
     progress: '<path d="M3.4 20.4h17.2"/><path d="M6.4 20.4v-5.8M11 20.4V9.6M15.6 20.4v-8.4M20.2 20.4V5.4"/>',
+    special: '<path d="M12 3.2l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',
   };
 
   /** 首頁 tiles — each one already carries its own number, so a parent reads
    *  餐費 NT$815 without opening 餐費. Same omit-don't-zero rule as the chips:
    *  a tile whose data is unknown says so in words («尚未填寫», «尚未公告»),
    *  it never shows a 0 that would read as an answer. */
-  function renderTiles(jrn, mbal, week, snaps) {
+  function renderTiles(jrn, mbal, week, snaps, special) {
     var money = function (n) { return "NT$" + Number(n || 0).toLocaleString("en-US"); };
     var today = todayLocal(), hhmm = function (t) { return String(t || "").slice(0, 5); };
+    var md = function (d) { return String(d || "").slice(5).replace("-", "/"); };
 
     var td = null;
     for (var i = 0; i < jrn.length; i++) if (jrn[i].entry_date === today) { td = jrn[i]; break; }
@@ -774,11 +788,23 @@
 
     var t = [["hw", "作業", hwV, td && td.homework ? "" : "q"],
              ["week", "課表", wkV, (week || []).length ? "" : "q"],
-             ["meal", "餐費", mlV, mbal && mbal.balance != null ? (mlLow ? "warn" : "") : "q"],
+             ["meal", "餐費", mlV, mbal && mbal.balance != null ? (mlLow ? "due" : "") : "q"],
              ["progress", "進度", pgV, last ? "" : "q"]];
 
+    // 特別班 appears ONLY when there is one. It is not a permanent tile reading
+    // 「目前沒有」 — that teaches a parent to stop looking at that square. The
+    // value is the nearest deadline still open, because that is the part they
+    // can miss; a class with no deadline left just says how many there are.
+    var sp = special || [];
+    if (sp.length) {
+      var soon = sp.map(function (r) { return r.signup_deadline; })
+                   .filter(function (d) { return d && d >= today; }).sort()[0];
+      t.push(["special", "特別班", soon ? "報名截止 " + md(soon) : "共 " + sp.length + " 班",
+              soon ? "due" : "", "wide"]);
+    }
+
     $("tiles").innerHTML = '<div class="tiles">' + t.map(function (x) {
-      return '<a class="tile" href="?s=' + x[0] + '"><div class="tI">' +
+      return '<a class="tile' + (x[4] ? " " + x[4] : "") + '" href="?s=' + x[0] + '"><div class="tI">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
         'stroke-linecap="round" stroke-linejoin="round">' + TILE_ICON[x[0]] + "</svg></div>" +
         '<div class="tL">' + esc(x[1]) + '</div><div class="tV ' + x[3] + '">' + esc(x[2]) + "</div></a>";
@@ -806,9 +832,13 @@
    *  is not — an empty state only earns its place where a parent expected
    *  something. The card hides itself rather than reporting its own emptiness. */
   function renderSpecial(rows) {
-    var card = $("sec-special");
-    if (!rows.length) { if (card) card.classList.add("vhide"); return; }
-    if (card) card.classList.remove("vhide");
+    // Reached only from the 特別班 tile, which exists only when there ARE rows —
+    // so an empty list here means they closed between the tile rendering and the
+    // tap, and saying so is better than a blank card.
+    if (!rows.length) {
+      $("special").innerHTML = '<p class="empty">目前沒有招生中的特別班。</p>';
+      return;
+    }
     var today = todayLocal();
     var md = function (d) { return String(d || "").slice(5).replace("-", "/"); };
     $("special").innerHTML = rows.map(function (r) {
