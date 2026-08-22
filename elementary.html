@@ -250,17 +250,17 @@
   /* ===== CTA + contact ===== */
   .ctaband{background:linear-gradient(150deg,var(--blue),var(--blue-ink));color:#fff}
   /* copy 左、表單右；手機時表單排在聯絡資訊之前（主要動作優先） */
-  .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,52px);align-items:start;
-    grid-template-areas:"copy form" "contact form" "ant form"}
+  .cta-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(20px,3vw,52px);row-gap:10px;align-items:start;
+    grid-template-areas:"copy form" "ant form" "ant contact"}
   .cta-copy{grid-area:copy}
   .cta-grid>.leadform{grid-area:form}
-  .cta-grid>.contact{grid-area:contact;background:transparent;border:none;border-top:1px dashed rgba(255,255,255,.24);border-radius:0;padding:16px 0 0;margin-top:4px}
+  .cta-grid>.contact{grid-area:contact;background:transparent;border:none;border-top:1px dashed rgba(255,255,255,.24);border-radius:0;padding:14px 0 0;margin-top:0}
   .cta-grid>.contact div{margin-bottom:6px}
   /* 收尾的螞蟻 — CTA 左下角本來就是空的（contact 短、右邊表單高），吉祥物填進去
      當結尾簽名。用彩色標，NOT ant-logo-reverse：reverse 會把整塊黑短褲翻成白的，
      看起來像穿白短褲。裝飾性質，所以 alt="" 讓螢幕閱讀器略過。 */
-  .cta-ant{grid-area:ant;height:270px;width:auto;display:block;align-self:end;justify-self:start;margin:68px 0 -30px}
-  @media(max-width:820px){.cta-grid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "contact" "ant"}
+  .cta-ant{grid-area:ant;height:550px;width:auto;display:block;align-self:end;justify-self:start;margin:0}
+  @media(max-width:820px){.cta-grid{grid-template-columns:1fr;row-gap:20px;grid-template-areas:"copy" "form" "contact" "ant"}
     .cta-ant{height:150px;margin:40px 0 0}}
   .ctaband h2{font-size:clamp(1.6rem,3.8vw,2.4rem);font-weight:900;letter-spacing:.02em}
   .ctaband h2 .g{background:linear-gradient(transparent 68%,rgba(248,196,20,.9) 68% 94%,transparent 94%);padding:0 .05em}
